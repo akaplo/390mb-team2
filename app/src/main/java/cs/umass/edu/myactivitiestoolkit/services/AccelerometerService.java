@@ -10,6 +10,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -166,6 +167,9 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     @Override
     protected void unregisterSensors() {
         //TODO : Unregister your sensors. Make sure mSensorManager is not null before calling its unregisterListener method.
+        if(mSensorManager!= null){
+            mSensorManager.unregisterListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
+        }
     }
 
     @Override
@@ -218,7 +222,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
 
             //TODO: Send the accelerometer reading to the server
-
+            Log.d(TAG, "X : " + event.values[0] + ", Y : " +
+                    event.values[1] + ", Z : " + event.values[2]);
             //TODO: broadcast the accelerometer reading to the UI
 
         }else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
