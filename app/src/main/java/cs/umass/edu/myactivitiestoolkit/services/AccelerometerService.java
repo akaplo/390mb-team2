@@ -155,8 +155,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
 
         //TODO : (Assignment 0) Register the accelerometer sensor from the sensor manager.
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        //registerListener(SensorEventListener listener, Sensor sensor, int samplingPeriodUs);
+        Sensor sense = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mSensorManager.registerListener(this, sense, SensorManager.SENSOR_DELAY_NORMAL);
         //TODO : (Assignment 1) Register your step detector. Register an OnStepListener to receive step events
     }
 
