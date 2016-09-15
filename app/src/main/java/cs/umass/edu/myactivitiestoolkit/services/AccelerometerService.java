@@ -225,7 +225,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             Log.d(TAG, "X : " + event.values[0] + ", Y : " +
                     event.values[1] + ", Z : " + event.values[2]);
             //TODO: broadcast the accelerometer reading to the UI
-
+            broadcastAccelerometerReading(timestamp_in_milliseconds, event.values);
         }else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
 
             // we received a step event detected by the built-in Android step detector (assignment 1)
@@ -250,6 +250,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
      */
     public void broadcastAccelerometerReading(final long timestamp, final float[] accelerometerReadings) {
         Intent intent = new Intent();
+        intent.putExtra(Constants.KEY.TIMESTAMP, timestamp);
         intent.putExtra(Constants.KEY.ACCELEROMETER_DATA, accelerometerReadings);
         intent.setAction(Constants.ACTION.BROADCAST_ACCELEROMETER_DATA);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
