@@ -250,7 +250,11 @@ public class AccelerometerService extends SensorService implements SensorEventLi
      */
     public void broadcastAccelerometerReading(final long timestamp, final float[] accelerometerReadings) {
         Intent intent = new Intent();
+<<<<<<< HEAD
         intent.putExtra(Constants.KEY.TIMESTAMP, timestamp);
+=======
+        Log.d(TAG, accelerometerReadings[0] + "");
+>>>>>>> 46134fe7938239c0e6006336dc379c7b5fd65657
         intent.putExtra(Constants.KEY.ACCELEROMETER_DATA, accelerometerReadings);
         intent.setAction(Constants.ACTION.BROADCAST_ACCELEROMETER_DATA);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
