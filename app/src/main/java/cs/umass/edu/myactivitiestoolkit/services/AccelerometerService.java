@@ -144,6 +144,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
                     return;
                 }
                 // TODO : broadcast activity to UI
+
             }
         });
     }
@@ -156,8 +157,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
 
         //TODO : (Assignment 0) Register the accelerometer sensor from the sensor manager.
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        Sensor sense = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(this, sense, SensorManager.SENSOR_DELAY_NORMAL);
+        mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mSensorManager.registerListener(this, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
         //TODO : (Assignment 1) Register your step detector. Register an OnStepListener to receive step events
     }
 
@@ -224,6 +225,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             //TODO: Send the accelerometer reading to the server
             Log.d(TAG, "X : " + event.values[0] + ", Y : " +
                     event.values[1] + ", Z : " + event.values[2]);
+            mClient.sendSensorReading(new AccelerometerReading("be.af.9a.d0.e9.3f.e3.db.8f.94", "MOBILE", "", timestamp_in_milliseconds, event.values));
             //TODO: broadcast the accelerometer reading to the UI
             broadcastAccelerometerReading(timestamp_in_milliseconds, event.values);
         }else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
