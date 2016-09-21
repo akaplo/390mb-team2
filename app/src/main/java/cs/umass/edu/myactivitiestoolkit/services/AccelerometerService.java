@@ -23,6 +23,7 @@ import edu.umass.cs.MHLClient.client.MessageReceiver;
 import edu.umass.cs.MHLClient.client.MobileIOClient;
 import edu.umass.cs.MHLClient.sensors.AccelerometerReading;
 import edu.umass.cs.MHLClient.sensors.SensorReading;
+import cs.umass.edu.myactivitiestoolkit.processing.Filter;
 
 /**
  * This service is responsible for collecting the accelerometer data on
@@ -106,6 +107,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         mStepDetector = new StepDetector();
     }
 
+
+
     @Override
     protected void onServiceStarted() {
         broadcastMessage(Constants.MESSAGE.ACCELEROMETER_SERVICE_STARTED);
@@ -160,6 +163,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
         //TODO : (Assignment 1) Register your step detector. Register an OnStepListener to receive step events
+        mStepSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
+        mSensorManager.registerListener(this,mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     /**
@@ -170,6 +175,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         //TODO : Unregister your sensors. Make sure mSensorManager is not null before calling its unregisterListener method.
         if(mSensorManager!= null){
             mSensorManager.unregisterListener(this, mAccelerometerSensor);
+            mSensorManager.unregisterListener(this, mStepSensor);
         }
     }
 
@@ -223,11 +229,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
 
             //TODO: Send the accelerometer reading to the server
-            Log.d(TAG, "X : " + event.values[0] + ", Y : " +
-                    event.values[1] + ", Z : " + event.values[2]);
-            AccelerometerReading output = new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, event.values);
             mClient.sendSensorReading(new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, event.values));
-            Log.d("sensorreading",output.toString());
             //TODO: broadcast the accelerometer reading to the UI
             broadcastAccelerometerReading(timestamp_in_milliseconds, event.values);
         }else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
@@ -255,7 +257,6 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     public void broadcastAccelerometerReading(final long timestamp, final float[] accelerometerReadings) {
         Intent intent = new Intent();
         intent.putExtra(Constants.KEY.TIMESTAMP, timestamp);
-        Log.d(TAG, accelerometerReadings[0] + "");
         intent.putExtra(Constants.KEY.ACCELEROMETER_DATA, accelerometerReadings);
         intent.setAction(Constants.ACTION.BROADCAST_ACCELEROMETER_DATA);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
