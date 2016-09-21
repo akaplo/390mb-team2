@@ -107,7 +107,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         mStepDetector = new StepDetector();
     }
 
-
+    //getFilteredValues?
 
     @Override
     protected void onServiceStarted() {
