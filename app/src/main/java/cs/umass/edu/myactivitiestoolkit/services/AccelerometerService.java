@@ -108,6 +108,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     }
 
     //getFilteredValues?
+    private final Filter mStepFilter = new Filter(1);
 
     @Override
     protected void onServiceStarted() {
