@@ -1,5 +1,10 @@
 .iml
-.idea
+.idea/vcs.xml
+.idea/modules.xml
+activitiesMaster.iml
+app/app.imp
+.swp
+390mb-team2.iml
 .gradle
 /local.properties
 /.idea/workspace.xml
