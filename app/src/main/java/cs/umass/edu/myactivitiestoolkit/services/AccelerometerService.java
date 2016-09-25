@@ -172,10 +172,10 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         //TODO : (Assignment 1) Register your step detector. Register an OnStepListener to receive step events
         mStepSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
 
-        /* The following listener registration is for detecting steps using the built-in Android algorithm.
-         * Uncomment when you want to use the built-in alg.
-         * mSensorManager.registerListener(this, mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
-         */
+        // The following listener registration is for detecting steps using the built-in Android algorithm.
+        //  Uncomment when you want to use the built-in alg.
+        mSensorManager.registerListener(this, mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
+
 
         // The following listener registration is for detecting steps using our custom algorithm
         mSensorManager.registerListener(stepDetector, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
@@ -385,7 +385,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
          */
         // TODO uncomment below when testing step detection algorithm to send
         // data to UI
-        // broadcastStepDetected(timestamp, values);
+         //broadcastStepDetected(timestamp, values);
 
     }
 }
