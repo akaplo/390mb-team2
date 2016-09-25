@@ -68,7 +68,11 @@ public class StepDetector implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 
-            //TODO: Detect steps! Call onStepDetected(...) when a step is detected.
+            //TODO: Implement step detection algorithm here.
+
+
+            // Call onStepDetected(...) when our alg determines that
+            // a step has occurred.
             onStepDetected(event.timestamp,event.values);
         }
     }
