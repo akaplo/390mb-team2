@@ -84,7 +84,7 @@ import cs.umass.edu.myactivitiestoolkit.processing.Filter;
  * @see SensorEvent
  * @see MobileIOClient
  */
-public class AccelerometerService extends SensorService implements SensorEventListener {
+public class AccelerometerService extends SensorService implements SensorEventListener, OnStepListener {
 
     /** Used during debugging to identify logs by class */
     private static final String TAG = AccelerometerService.class.getName();
@@ -171,10 +171,25 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         mSensorManager.registerListener(this, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
         //TODO : (Assignment 1) Register your step detector. Register an OnStepListener to receive step events
         mStepSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
-        // The following listener registration is for detecting steps using the built-in Android algorithm
-      //  mSensorManager.registerListener(this, mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
+
+        /* The following listener registration is for detecting steps using the built-in Android algorithm.
+         * Uncomment when you want to use the built-in alg.
+         * mSensorManager.registerListener(this, mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
+         */
+
         // The following listener registration is for detecting steps using our custom algorithm
         mSensorManager.registerListener(stepDetector, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        /**
+         * When using our custom algorithm, we must tell our StepDecector instance
+         * that we want to know when our alg has detected a step.
+         * We use `this` to tell it that the AccelerometerService is
+         * prepared to accept the data is wishes to disseminate.
+         *
+         * See the bottom of this file for the implementation of the
+         * OnStepListener interface that makes this possible.
+         */
+        stepDetector.registerOnStepListener(this);
     }
 
     /**
@@ -184,9 +199,17 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     protected void unregisterSensors() {
         //TODO : Unregister your sensors. Make sure mSensorManager is not null before calling its unregisterListener method.
         if(mSensorManager!= null){
+            // stop getting data from the built-in accelerometer
             mSensorManager.unregisterListener(this, mAccelerometerSensor);
+            // stop getting data from the built in step detector
             mSensorManager.unregisterListener(this, mStepSensor);
-            stepDetector.unregisterOnStepListener(stepListener);
+            // stop sending data to the custom step detector alg
+            mSensorManager.unregisterListener(stepDetector);
+            // stop receiving steps from the custom step detector alg;
+            // tells our StepDetector instance that the AccelerometerService
+            // no longer cares about steps being detected.
+            stepDetector.unregisterOnStepListener(this);
+
         }
     }
 
@@ -326,5 +349,43 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         intent.setAction(Constants.ACTION.BROADCAST_ACCELEROMETER_PEAK);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.sendBroadcast(intent);
+    }
+
+    /**
+     * Required to implement by OnStepListener interface.
+     *
+     * Send the amount of steps counted overall to the UI.
+     *
+     * @param stepCount the number of steps taken so far,
+     *                  as determined by our algorithm
+     */
+    @Override
+    public void onStepCountUpdated(int stepCount) {
+        Log.d(TAG, "step count updated.  step # " + stepCount);
+        broadcastLocalStepCount(stepCount);
+    }
+
+    /***
+     * Required to implement by OnStepListener interface.
+     *
+     * Send the filtered accelerometer values from
+     * our algorithm to the UI.  Useful for debugging.
+     *
+     *
+     * @param timestamp timestamp in ms
+     * @param values the filtered x, y, and z values from our step detection alg
+     */
+    @Override
+    public void onStepDetected(long timestamp, float[] values) {
+        Log.d(TAG, "step detected: " + values);
+        /***
+         * NOTE: If other methods in this file are also sending data to the UI
+         * simultaneously, the graph will look bad.  Only send data to the UI
+         * from ONE METHOD AT A TIME!
+         */
+        // TODO uncomment below when testing step detection algorithm to send
+        // data to UI
+        // broadcastStepDetected(timestamp, values);
+
     }
 }
