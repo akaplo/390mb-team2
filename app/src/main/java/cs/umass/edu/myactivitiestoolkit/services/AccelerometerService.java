@@ -18,6 +18,7 @@ import java.util.Locale;
 
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
+import cs.umass.edu.myactivitiestoolkit.steps.OnStepListener;
 import cs.umass.edu.myactivitiestoolkit.steps.StepDetector;
 import edu.umass.cs.MHLClient.client.MessageReceiver;
 import edu.umass.cs.MHLClient.client.MobileIOClient;
@@ -108,7 +109,11 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     }
 
     //getFilteredValues?
-    private final Filter mStepFilter = new Filter(1);
+    public Filter filter = new Filter(5.0);
+    public double[] FValues;
+    public StepDetector stepDetector = new StepDetector();
+    public OnStepListener stepListener;
+    private int stepCount=0;
 
     @Override
     protected void onServiceStarted() {
@@ -131,6 +136,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
                     JSONObject data = json.getJSONObject("data");
                     long timestamp = data.getLong("timestamp");
                     Log.d(TAG, "Step occurred at " + timestamp + ".");
+                    stepCount++;
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -165,7 +171,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         mSensorManager.registerListener(this, mAccelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
         //TODO : (Assignment 1) Register your step detector. Register an OnStepListener to receive step events
         mStepSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
-        mSensorManager.registerListener(this,mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(stepDetector,mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
+        stepDetector.registerOnStepListener(stepListener);
     }
 
     /**
@@ -177,6 +184,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         if(mSensorManager!= null){
             mSensorManager.unregisterListener(this, mAccelerometerSensor);
             mSensorManager.unregisterListener(this, mStepSensor);
+            stepDetector.unregisterOnStepListener(stepListener);
         }
     }
 
@@ -222,6 +230,14 @@ public class AccelerometerService extends SensorService implements SensorEventLi
      * @see #broadcastAccelerometerReading(long, float[])
      */
 
+    public float[] filterValues(float[] values){
+        FValues = filter.getFilteredValues(values);
+        float[] ret = new float[FValues.length];
+        for(int i=0; i<FValues.length;i++){
+            ret[i]=(float)FValues[i];
+        }
+        return ret;
+    }
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -230,13 +246,16 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
 
             //TODO: Send the accelerometer reading to the server
-            mClient.sendSensorReading(new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, event.values));
+            mClient.sendSensorReading(new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, filterValues(event.values)));
             //TODO: broadcast the accelerometer reading to the UI
-            broadcastAccelerometerReading(timestamp_in_milliseconds, event.values);
+            broadcastAccelerometerReading(timestamp_in_milliseconds, filterValues(event.values));
+            broadcastStepDetected(timestamp_in_milliseconds,filterValues(event.values));
         }else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
 
             // we received a step event detected by the built-in Android step detector (assignment 1)
             broadcastAndroidStepCount(mAndroidStepCount++);
+            //stepCount increased in two places
+            broadcastLocalStepCount(stepCount++);
 
         } else {
 
