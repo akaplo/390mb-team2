@@ -18,6 +18,10 @@ public class StepDetector implements SensorEventListener {
     /** Used for debugging purposes. */
     @SuppressWarnings("unused")
     private static final String TAG = StepDetector.class.getName();
+    private int count = 0;
+    private double average = 0;
+    private int side = 0;
+    private long latest = 0;
 
     /** Maintains the set of listeners registered to handle step events. **/
     private ArrayList<OnStepListener> mStepListeners;
@@ -69,11 +73,62 @@ public class StepDetector implements SensorEventListener {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 
             //TODO: Implement step detection algorithm here.
+            // detectStep will call onStepDetected for us
+            // when it determines we've taken a step.
+            detectStep(event.timestamp, event.values);
+        }
+    }
 
+    private void detectStep(long timestamp, float[] filteredValues) {
+        // sum of squares of each direction, preserving negatives
+        double combined = 0;
+        for (float value : filteredValues) {
+            combined += (Math.abs(value) * value);
+        }
+        // Square root of combined, preserving negatives
+        if (combined < 0) {
+            combined = -1 * (Math.pow(Math.abs(combined), 0.5));
+        }
+        else {
+            combined = Math.pow(combined, 0.5);
+        }
 
-            // Call onStepDetected(...) when our alg determines that
-            // a step has occurred.
-            onStepDetected(event.timestamp,event.values);
+        // Multiply the average by the count to add this point to the average
+        double newSum = average * count;
+        // Increment the count
+        count++;
+        // Calculate the new average
+        average = ((newSum + combined) / count);
+
+        // This initializes the side variable by putting it on one side at first
+        if ((combined != average) && side == 0) {
+            if (combined > average) {
+                side = 1;
+            } else {
+                side = -1;
+            }
+        }
+
+        //If the current point is greater than the average and the last one was less
+        if ((combined >= average) && (side < 0)) {
+            // If the difference between this 0-crossing and the last one is in the step range
+            if (((timestamp - latest) < 750) && ((timestamp - latest) > 315)) {
+                onStepDetected(timestamp, filteredValues);
+            }
+            // Update the latest 0-crossing and side
+            latest = timestamp;
+            side *= (-1);
+        }
+
+        // If the current point is less than the average and the last one was greater
+        if ((combined <= average) && side > 0) {
+            // If the difference between this 0-crossing and the last one is in the step range
+            if (((timestamp - latest) < 750) && ((timestamp - latest) > 315)) {
+                onStepDetected(timestamp, filteredValues);
+            }
+            // Update the latest 0-crossing and side
+            latest = timestamp;
+            side *= (-1);
         }
     }
 
