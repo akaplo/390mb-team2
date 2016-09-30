@@ -108,7 +108,6 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         mStepDetector = new StepDetector();
     }
 
-    //getFilteredValues?
     public Filter filter = new Filter(5.0);
     public double[] FValues;
     public StepDetector stepDetector = new StepDetector();
@@ -256,7 +255,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
      */
 
     public float[] filterValues(float[] values){
-        FValues = filter.getFilteredValues(values);
+        FValues = filter.getFilteredValues(values); //returns array of doubles
         float[] ret = new float[FValues.length];
         for(int i=0; i<FValues.length;i++){
             ret[i]=(float)FValues[i];
