@@ -107,8 +107,10 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     public AccelerometerService(){
         mStepDetector = new StepDetector();
     }
+    
 
-    public Filter filter = new Filter(5.0);
+    public Filter filter = new Filter(10);
+
     public double[] FValues;
     public StepDetector stepDetector = new StepDetector();
     public OnStepListener stepListener;
