@@ -48,4 +48,13 @@
     <string name="text_switch_gps">Location</string>
 
     <string name="app_details">CS390MB : Mobile Health Sensing</string>
+
+    <string-array name="activities">
+        <item>No Label</item>
+        <item>Sit</item>
+        <item>Walk</item>
+        <item>Jump</item>
+        <item>Run</item>
+    </string-array>
+
 </resources>

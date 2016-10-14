@@ -11,10 +11,14 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -75,7 +79,9 @@ import cs.umass.edu.myactivitiestoolkit.services.ServiceManager;
  * @see XYPlot
  * @see Fragment
  */
-public class ExerciseFragment extends Fragment {
+public class ExerciseFragment extends Fragment implements AdapterView.OnItemSelectedListener {
+
+    private Spinner mSpinner;
 
     /** Used during debugging to identify logs by class. */
     @SuppressWarnings("unused")
@@ -295,6 +301,16 @@ public class ExerciseFragment extends Fragment {
         mPeakSeriesFormatter = new LineAndPointFormatter(null, Color.BLUE, null, null);
         mPeakSeriesFormatter.getVertexPaint().setStrokeWidth(PixelUtils.dpToPix(10)); //enlarge the peak points
 
+        mSpinner = (Spinner) view.findViewById(R.id.spinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.activities, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        mSpinner.setAdapter(adapter);
+        mSpinner.setOnItemSelectedListener(this);
+
         return view;
     }
 
@@ -422,5 +438,19 @@ public class ExerciseFragment extends Fragment {
         mPlot.addSeries(zSeries, mZSeriesFormatter);
         mPlot.addSeries(peaks, mPeakSeriesFormatter);
         mPlot.redraw();
+    }
+
+    public static String mLabel = null;
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // An item was selected. You can retrieve the selected item using
+        // parent.getItemAtPosition(pos)
+        Log.d(TAG, parent.getItemAtPosition(position).toString());
+        mLabel = parent.getItemAtPosition(position).toString();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // do nothing
     }
 }

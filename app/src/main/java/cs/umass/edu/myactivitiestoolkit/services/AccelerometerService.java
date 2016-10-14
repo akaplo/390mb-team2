@@ -5,7 +5,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Binder;
 import android.os.Build;
+import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -89,6 +91,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
 
     /** Used during debugging to identify logs by class */
     private static final String TAG = AccelerometerService.class.getName();
+
+    public String mLabel;
 
     /** Sensor Manager object for registering and unregistering system sensors */
     private SensorManager mSensorManager;
@@ -272,7 +276,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
 
             //TODO: Send the accelerometer reading to the server
-            //mClient.sendSensorReading(new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, label, filterValues(event.values)));
+            mClient.sendSensorReading(new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, filterValues(event.values)));
             //TODO: broadcast the accelerometer reading to the UI
             broadcastAccelerometerReading(timestamp_in_milliseconds, filterValues(event.values));
             broadcastStepDetected(timestamp_in_milliseconds,filterValues(event.values));
@@ -392,5 +396,28 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     public void sender(int x){
 
         Log.d("accelerometer","0");
+    }
+
+    private final IBinder mBinder = new LocalBinder();
+
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class LocalBinder extends Binder {
+        AccelerometerService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return AccelerometerService.this;
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    /** method for clients */
+    public void updateLabel(String label) {
+        mLabel = label;
     }
 }
