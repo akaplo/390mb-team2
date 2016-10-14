@@ -20,6 +20,7 @@ import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
 import cs.umass.edu.myactivitiestoolkit.steps.OnStepListener;
 import cs.umass.edu.myactivitiestoolkit.steps.StepDetector;
+import cs.umass.edu.myactivitiestoolkit.view.activities.MainActivity;
 import edu.umass.cs.MHLClient.client.MessageReceiver;
 import edu.umass.cs.MHLClient.client.MobileIOClient;
 import edu.umass.cs.MHLClient.sensors.AccelerometerReading;
@@ -84,7 +85,7 @@ import cs.umass.edu.myactivitiestoolkit.processing.Filter;
  * @see SensorEvent
  * @see MobileIOClient
  */
-public class AccelerometerService extends SensorService implements SensorEventListener, OnStepListener {
+public class AccelerometerService extends SensorService implements SensorEventListener, OnStepListener, MainActivity.sendActivity {
 
     /** Used during debugging to identify logs by class */
     private static final String TAG = AccelerometerService.class.getName();
@@ -107,7 +108,6 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     public AccelerometerService(){
         mStepDetector = new StepDetector();
     }
-    
 
     public Filter filter = new Filter(10);
 
@@ -272,7 +272,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
 
             //TODO: Send the accelerometer reading to the server
-            mClient.sendSensorReading(new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, filterValues(event.values)));
+            //mClient.sendSensorReading(new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, label, filterValues(event.values)));
             //TODO: broadcast the accelerometer reading to the UI
             broadcastAccelerometerReading(timestamp_in_milliseconds, filterValues(event.values));
             broadcastStepDetected(timestamp_in_milliseconds,filterValues(event.values));
@@ -388,5 +388,9 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         // data to UI
          //broadcastStepDetected(timestamp, values);
 
+    }
+    public void sender(int x){
+
+        Log.d("accelerometer","0");
     }
 }

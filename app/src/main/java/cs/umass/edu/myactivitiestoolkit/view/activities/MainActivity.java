@@ -14,10 +14,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
 import android.widget.TextView;
+
+import java.io.Serializable;
 
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
+import cs.umass.edu.myactivitiestoolkit.services.AccelerometerService;
 import cs.umass.edu.myactivitiestoolkit.view.fragments.AboutFragment;
 import cs.umass.edu.myactivitiestoolkit.view.fragments.AudioFragment;
 import cs.umass.edu.myactivitiestoolkit.view.fragments.ExerciseFragment;
@@ -204,6 +208,27 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         super.onStop();
+    }
+
+    //interface sends which activity is clicked to accelerometer service
+    public interface sendActivity extends Serializable{
+        void sender(int x);
+    }
+
+
+    public void sitClicked(View v){
+        //sendActivity send = (sendActivity) getParentActivityIntent(this);
+        //send.sender(0);
+
+    }
+    public void walkClicked(View v){
+
+    }
+    public void jumpClicked(View v){
+
+    }
+    public void runClicked(View v){
+
     }
 
     @Override

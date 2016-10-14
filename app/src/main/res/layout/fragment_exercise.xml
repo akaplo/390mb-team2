@@ -107,16 +107,33 @@
             </LinearLayout>
 
         </LinearLayout>
-        <TextView
-            android:id="@+id/txtActivity"
-            android:drawableStart="@drawable/ic_running_black_48dp"
-            android:text="@string/activity_initial"
-            android:textSize="20sp"
-            android:textColor="@android:color/holo_blue_dark"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:gravity="center" />
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/sit"
+                android:layout_width="100px"
+                android:layout_height="100px"
+                android:text="sit"
+                android:onClick="sitClicked"/>
+            <RadioButton android:id="@+id/walk"
+                android:layout_width="100px"
+                android:layout_height="100px"
+                android:text="walk"
+                android:onClick="walkClicked"/>
+            <RadioButton android:id="@+id/jump"
+                android:layout_width="100px"
+                android:layout_height="100px"
+                android:text="jump"
+                android:onClick="jumpClicked"/>
+            <RadioButton android:id="@+id/run"
+                android:layout_width="100px"
+                android:layout_height="100px"
+                android:text="run"
+                android:onClick="runClicked"/>
+        </RadioGroup>
+
+
     </LinearLayout>
 
 

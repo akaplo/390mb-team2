@@ -237,7 +237,8 @@ public class ExerciseFragment extends Fragment {
         txtServerStepCount = (TextView) view.findViewById(R.id.txtServerStepCount);
 
         //obtain reference to the activity text field
-        txtActivity = (TextView) view.findViewById(R.id.txtActivity);
+
+        //txtActivity deleted
 
         //obtain references to the on/off switches and handle the toggling appropriately
         switchAccelerometer = (Switch) view.findViewById(R.id.switchAccelerometer);
@@ -331,6 +332,7 @@ public class ExerciseFragment extends Fragment {
         filter.addAction(Constants.ACTION.BROADCAST_ANDROID_STEP_COUNT);
         filter.addAction(Constants.ACTION.BROADCAST_LOCAL_STEP_COUNT);
         broadcastManager.registerReceiver(receiver, filter);
+
     }
 
     /**
