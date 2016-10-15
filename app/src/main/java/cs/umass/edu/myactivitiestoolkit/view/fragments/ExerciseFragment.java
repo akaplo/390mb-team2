@@ -11,10 +11,14 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -75,7 +79,15 @@ import cs.umass.edu.myactivitiestoolkit.services.ServiceManager;
  * @see XYPlot
  * @see Fragment
  */
-public class ExerciseFragment extends Fragment {
+public class ExerciseFragment extends Fragment implements AdapterView.OnItemSelectedListener {
+
+    LocalBroadcastManager mBroadcastManager;
+
+    public static int NO_LABEL = -1;
+    public static int SIT_LABEL = 0;
+    public static int WALK_LABEL = 1;
+    public static int JUMP_LABEL = 2;
+    public static int RUN_LABEL = 3;
 
     /** Used during debugging to identify logs by class. */
     @SuppressWarnings("unused")
@@ -295,6 +307,16 @@ public class ExerciseFragment extends Fragment {
         mPeakSeriesFormatter = new LineAndPointFormatter(null, Color.BLUE, null, null);
         mPeakSeriesFormatter.getVertexPaint().setStrokeWidth(PixelUtils.dpToPix(10)); //enlarge the peak points
 
+        Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.activities, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+
         return view;
     }
 
@@ -324,15 +346,14 @@ public class ExerciseFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        mBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION.BROADCAST_MESSAGE);
         filter.addAction(Constants.ACTION.BROADCAST_ACCELEROMETER_DATA);
         filter.addAction(Constants.ACTION.BROADCAST_ACCELEROMETER_PEAK);
         filter.addAction(Constants.ACTION.BROADCAST_ANDROID_STEP_COUNT);
         filter.addAction(Constants.ACTION.BROADCAST_LOCAL_STEP_COUNT);
-        broadcastManager.registerReceiver(receiver, filter);
-
+        mBroadcastManager.registerReceiver(receiver, filter);
     }
 
     /**
@@ -422,5 +443,40 @@ public class ExerciseFragment extends Fragment {
         mPlot.addSeries(zSeries, mZSeriesFormatter);
         mPlot.addSeries(peaks, mPeakSeriesFormatter);
         mPlot.redraw();
+    }
+
+    private int getLabelFromString(String label) {
+        if (label.equals("No Label")) {
+            return NO_LABEL;
+        }
+        else if (label.equals("Sit")) {
+            return SIT_LABEL;
+        }
+        else if (label.equals("Walk")) {
+            return WALK_LABEL;
+        }
+        else if (label.equals("Jump")) {
+            return JUMP_LABEL;
+        }
+        else if (label.equals("Run")) {
+            return  RUN_LABEL;
+        }
+        else return Integer.MIN_VALUE;
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // An item was selected. You can retrieve the selected item using
+        // parent.getItemAtPosition(pos)
+        Log.d(TAG, parent.getItemAtPosition(position).toString());
+        Intent i = new Intent();
+        i.setAction(Constants.ACTION.BROADCAST_LABEL_CHANGE);
+        i.putExtra(Constants.ACTION.LABEL, getLabelFromString(parent.getItemAtPosition(position).toString()));
+        mBroadcastManager.sendBroadcast(i);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // do nothing
     }
 }

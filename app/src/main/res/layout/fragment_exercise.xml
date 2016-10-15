@@ -81,6 +81,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
+                <Spinner
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/spinner" />
+
                 <TextView
                     android:id="@+id/txtLocalStepCount"
                     android:text="@string/local_step_count_initial"
@@ -107,32 +112,6 @@
             </LinearLayout>
 
         </LinearLayout>
-        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <RadioButton android:id="@+id/sit"
-                android:layout_width="100px"
-                android:layout_height="100px"
-                android:text="sit"
-                android:onClick="sitClicked"/>
-            <RadioButton android:id="@+id/walk"
-                android:layout_width="100px"
-                android:layout_height="100px"
-                android:text="walk"
-                android:onClick="walkClicked"/>
-            <RadioButton android:id="@+id/jump"
-                android:layout_width="100px"
-                android:layout_height="100px"
-                android:text="jump"
-                android:onClick="jumpClicked"/>
-            <RadioButton android:id="@+id/run"
-                android:layout_width="100px"
-                android:layout_height="100px"
-                android:text="run"
-                android:onClick="runClicked"/>
-        </RadioGroup>
-
 
     </LinearLayout>
 

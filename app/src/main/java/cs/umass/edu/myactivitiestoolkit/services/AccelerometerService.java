@@ -1,11 +1,16 @@
 package cs.umass.edu.myactivitiestoolkit.services;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Binder;
 import android.os.Build;
+import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -21,6 +26,7 @@ import cs.umass.edu.myactivitiestoolkit.constants.Constants;
 import cs.umass.edu.myactivitiestoolkit.steps.OnStepListener;
 import cs.umass.edu.myactivitiestoolkit.steps.StepDetector;
 import cs.umass.edu.myactivitiestoolkit.view.activities.MainActivity;
+import cs.umass.edu.myactivitiestoolkit.view.fragments.ExerciseFragment;
 import edu.umass.cs.MHLClient.client.MessageReceiver;
 import edu.umass.cs.MHLClient.client.MobileIOClient;
 import edu.umass.cs.MHLClient.sensors.AccelerometerReading;
@@ -85,10 +91,12 @@ import cs.umass.edu.myactivitiestoolkit.processing.Filter;
  * @see SensorEvent
  * @see MobileIOClient
  */
-public class AccelerometerService extends SensorService implements SensorEventListener, OnStepListener, MainActivity.sendActivity {
+public class AccelerometerService extends SensorService implements SensorEventListener, OnStepListener {
 
     /** Used during debugging to identify logs by class */
     private static final String TAG = AccelerometerService.class.getName();
+
+    public int mLabel;
 
     /** Sensor Manager object for registering and unregistering system sensors */
     private SensorManager mSensorManager;
@@ -115,15 +123,22 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     public StepDetector stepDetector = new StepDetector();
     public OnStepListener stepListener;
     private int stepCount=0;
+    LocalBroadcastManager mBroadcastManager;
+
 
     @Override
     protected void onServiceStarted() {
         broadcastMessage(Constants.MESSAGE.ACCELEROMETER_SERVICE_STARTED);
+        mBroadcastManager = LocalBroadcastManager.getInstance(this);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Constants.ACTION.BROADCAST_LABEL_CHANGE);
+        mBroadcastManager.registerReceiver(receiver, filter);
     }
 
     @Override
     protected void onServiceStopped() {
         broadcastMessage(Constants.MESSAGE.ACCELEROMETER_SERVICE_STOPPED);
+        mBroadcastManager.unregisterReceiver(receiver);
     }
 
     @Override
@@ -159,6 +174,19 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             }
         });
     }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "received message!");
+            if (intent.getAction() != null) {
+                if (intent.getAction().equals(Constants.ACTION.BROADCAST_LABEL_CHANGE)) {
+                    mLabel = intent.getIntExtra(Constants.ACTION.LABEL, Integer.MIN_VALUE);
+                    Log.d(TAG, "Got new label: " + mLabel);
+                }
+            }
+        }
+    };
 
     /**
      * Register accelerometer sensor listener
@@ -272,7 +300,12 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
 
             //TODO: Send the accelerometer reading to the server
-            //mClient.sendSensorReading(new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, label, filterValues(event.values)));
+            if (mLabel == ExerciseFragment.NO_LABEL) {
+                mClient.sendSensorReading(new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, filterValues(event.values)));
+            }
+            else {
+                mClient.sendSensorReading(new AccelerometerReading(mUserID, "MOBILE", "", timestamp_in_milliseconds, mLabel, filterValues((event.values))));
+            }
             //TODO: broadcast the accelerometer reading to the UI
             broadcastAccelerometerReading(timestamp_in_milliseconds, filterValues(event.values));
             broadcastStepDetected(timestamp_in_milliseconds,filterValues(event.values));
@@ -388,9 +421,5 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         // data to UI
          //broadcastStepDetected(timestamp, values);
 
-    }
-    public void sender(int x){
-
-        Log.d("accelerometer","0");
     }
 }
