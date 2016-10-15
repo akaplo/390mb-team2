@@ -81,7 +81,13 @@ import cs.umass.edu.myactivitiestoolkit.services.ServiceManager;
  */
 public class ExerciseFragment extends Fragment implements AdapterView.OnItemSelectedListener {
 
-    private Spinner mSpinner;
+    LocalBroadcastManager mBroadcastManager;
+
+    public static int NO_LABEL = -1;
+    public static int SIT_LABEL = 0;
+    public static int WALK_LABEL = 1;
+    public static int JUMP_LABEL = 2;
+    public static int RUN_LABEL = 3;
 
     /** Used during debugging to identify logs by class. */
     @SuppressWarnings("unused")
@@ -301,15 +307,15 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         mPeakSeriesFormatter = new LineAndPointFormatter(null, Color.BLUE, null, null);
         mPeakSeriesFormatter.getVertexPaint().setStrokeWidth(PixelUtils.dpToPix(10)); //enlarge the peak points
 
-        mSpinner = (Spinner) view.findViewById(R.id.spinner);
+        Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.activities, android.R.layout.simple_spinner_item);
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
-        mSpinner.setAdapter(adapter);
-        mSpinner.setOnItemSelectedListener(this);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
 
         return view;
     }
@@ -340,15 +346,14 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
     public void onStart() {
         super.onStart();
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        mBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION.BROADCAST_MESSAGE);
         filter.addAction(Constants.ACTION.BROADCAST_ACCELEROMETER_DATA);
         filter.addAction(Constants.ACTION.BROADCAST_ACCELEROMETER_PEAK);
         filter.addAction(Constants.ACTION.BROADCAST_ANDROID_STEP_COUNT);
         filter.addAction(Constants.ACTION.BROADCAST_LOCAL_STEP_COUNT);
-        broadcastManager.registerReceiver(receiver, filter);
-
+        mBroadcastManager.registerReceiver(receiver, filter);
     }
 
     /**
@@ -440,13 +445,34 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         mPlot.redraw();
     }
 
-    public static String mLabel = null;
+    private int getLabelFromString(String label) {
+        if (label.equals("No Label")) {
+            return NO_LABEL;
+        }
+        else if (label.equals("Sit")) {
+            return SIT_LABEL;
+        }
+        else if (label.equals("Walk")) {
+            return WALK_LABEL;
+        }
+        else if (label.equals("Jump")) {
+            return JUMP_LABEL;
+        }
+        else if (label.equals("Run")) {
+            return  RUN_LABEL;
+        }
+        else return Integer.MIN_VALUE;
+    }
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         // An item was selected. You can retrieve the selected item using
         // parent.getItemAtPosition(pos)
         Log.d(TAG, parent.getItemAtPosition(position).toString());
-        mLabel = parent.getItemAtPosition(position).toString();
+        Intent i = new Intent();
+        i.setAction(Constants.ACTION.BROADCAST_LABEL_CHANGE);
+        i.putExtra(Constants.ACTION.LABEL, getLabelFromString(parent.getItemAtPosition(position).toString()));
+        mBroadcastManager.sendBroadcast(i);
     }
 
     @Override

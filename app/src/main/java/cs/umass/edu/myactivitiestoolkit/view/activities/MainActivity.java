@@ -210,27 +210,6 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    //interface sends which activity is clicked to accelerometer service
-    public interface sendActivity extends Serializable{
-        void sender(int x);
-    }
-
-
-    public void sitClicked(View v){
-        //sendActivity send = (sendActivity) getParentActivityIntent(this);
-        //send.sender(0);
-
-    }
-    public void walkClicked(View v){
-
-    }
-    public void jumpClicked(View v){
-
-    }
-    public void runClicked(View v){
-
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
