@@ -217,8 +217,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void sitClicked(View v){
-        //sendActivity send = (sendActivity) getParentActivityIntent(this);
-        //send.sender(0);
+        Intent intent = new Intent(AccelerometerService.class.getName());
+        intent.putExtra("activity",0);
+        this.getApplicationContext().startService(intent);
+        this.getBaseContext().startService(intent);
+        this.startService(intent);
+
+        Log.d("sitclicked","main");
+
 
     }
     public void walkClicked(View v){

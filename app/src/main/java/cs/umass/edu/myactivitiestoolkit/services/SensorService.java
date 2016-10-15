@@ -43,6 +43,7 @@ public abstract class SensorService extends Service implements ConnectionStateHa
     /** The user ID required to authenticate the server connection. */
     protected String mUserID;
 
+    public static int activity;
     /**
      * Called when the servie has been started.
      */
@@ -122,6 +123,8 @@ public abstract class SensorService extends Service implements ConnectionStateHa
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null){
+            activity = intent.getIntExtra("activity",0);
+            Log.d("activity=", Integer.toString(activity));
             if (intent.getAction().equals(Constants.ACTION.START_SERVICE)) {
                 start();
             } else if (intent.getAction().equals(Constants.ACTION.STOP_SERVICE)) {
