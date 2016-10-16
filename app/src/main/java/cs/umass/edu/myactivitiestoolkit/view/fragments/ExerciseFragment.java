@@ -83,6 +83,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
 
     LocalBroadcastManager mBroadcastManager;
 
+    // Label for each activity
     public static int NO_LABEL = -1;
     public static int SIT_LABEL = 0;
     public static int WALK_LABEL = 1;
@@ -459,6 +460,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
             case "Sit": return SIT_LABEL;
             case "Walk": return WALK_LABEL;
             case "Jump": return JUMP_LABEL;
+            case "Run": return RUN_LABEL;
             default: return Integer.MIN_VALUE;
         }
     }
