@@ -307,6 +307,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         mPeakSeriesFormatter = new LineAndPointFormatter(null, Color.BLUE, null, null);
         mPeakSeriesFormatter.getVertexPaint().setStrokeWidth(PixelUtils.dpToPix(10)); //enlarge the peak points
 
+        // "Spinner" is the dropdown box on the UI - a terrible class name
         Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
@@ -315,6 +316,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
+        // Specify that this class (see onItemSelected below) is the desired listener
         spinner.setOnItemSelectedListener(this);
 
         return view;
@@ -445,36 +447,50 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         mPlot.redraw();
     }
 
+    /**
+     * Given an activity, return an int that can
+     * be sent to the data collection server.
+     * @param label: String - one of the options in the dropdown on the UI
+     * @return int - the integer representation of the input
+     */
     private int getLabelFromString(String label) {
-        if (label.equals("No Label")) {
-            return NO_LABEL;
+        switch (label) {
+            case "No Label": return  NO_LABEL;
+            case "Sit": return SIT_LABEL;
+            case "Walk": return WALK_LABEL;
+            case "Jump": return JUMP_LABEL;
+            default: return Integer.MIN_VALUE;
         }
-        else if (label.equals("Sit")) {
-            return SIT_LABEL;
-        }
-        else if (label.equals("Walk")) {
-            return WALK_LABEL;
-        }
-        else if (label.equals("Jump")) {
-            return JUMP_LABEL;
-        }
-        else if (label.equals("Run")) {
-            return  RUN_LABEL;
-        }
-        else return Integer.MIN_VALUE;
     }
 
+    /**
+     * Callback function for when the user has selected an activity
+     * from the dropdown on the UI.
+     * Required to implement as part of AdapterView.OnItemSelected interface.
+     */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        // An item was selected. You can retrieve the selected item using
-        // parent.getItemAtPosition(pos)
+        // An item was selected. Retrieve the selected item using
+        // parent.getItemAtPosition(position)
         Log.d(TAG, parent.getItemAtPosition(position).toString());
+        // Prepare an Intent that will be broadcast to
+        // anyone that cares about label updates.
         Intent i = new Intent();
+        // Anyone listening for label changes
+        // will use a filter to look for this action:
         i.setAction(Constants.ACTION.BROADCAST_LABEL_CHANGE);
-        i.putExtra(Constants.ACTION.LABEL, getLabelFromString(parent.getItemAtPosition(position).toString()));
+        // Turn the name of the activity into an int
+        int label = getLabelFromString(parent.getItemAtPosition(position).toString());
+        // Stick that int into the Intent
+        i.putExtra(Constants.ACTION.LABEL, label);
+        // Broadcast the Intent to anyone listening.
         mBroadcastManager.sendBroadcast(i);
     }
 
+    /**
+     * Required to implement as part of AdapterView.OnItemSelected interface.
+     * Not needed by us, though.
+     */
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         // do nothing
