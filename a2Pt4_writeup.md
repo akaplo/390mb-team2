@@ -1,4 +1,4 @@
-# 390MB Team 2 - Aaron Kaplowitz, Todd Morse, Dan Snyder
+# Team 2 - Aaron Kaplowitz, Todd Morse, Dan Snyder
 ## Assignment 2 Part 4 Writeup
 
 ### Question 1
@@ -57,3 +57,9 @@ average recall:
 The sample data also has half as many labels, so our classifier should have a much higher random success rate (1/2 vs 1/4), so this likely also contributes to the sample data's higher numbers.
 
 Empirically, our classifier trained on our data works really well!  When running activity recognition, it takes a few datapoints to get itself going, and subsequently is pretty much spot-on.  It occasionally has trouble differentiating running from walking, but it's correct the vast majority of the time.  I'd say that the activity/precision/recall matches up to the empirical recognition data.
+
+
+### Contributions and Misc
+For part 4, Aaron and Dan worked on the Android code while collaborating with Todd on the Python.  Aaron created the training data and did the real-world testing.
+
+This project was **HARD**.
