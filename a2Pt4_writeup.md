@@ -23,3 +23,37 @@ Let’s provide some more concrete detail about each step:
 
 ### Question 2
 Our classification algorithm uses a decision tree classifier over a 10-fold cross-verification.  Our parameters (technically hyperparameters) are a maximum depth of 3 and a maximum features of 5.  Our other algorithm was a logistic regression with no explicit parameters, but we initialized a 10-fold cross validation with no shuffle, and no random state.  We ended up going with the former of the two because it had a higher accuracy as well as a higher precision and recall.
+
+
+### Question 3
+It's pretty good!
+
+Here's the accuracy, precision, and recall for our collected training data:
+```
+average accuracy:
+0.854342544792
+
+average precision for each activity:
+[   sitting,    walking,    jumping,    running ]
+[ 0.83479864  0.94505756  0.48098291  0.74430278]
+
+average recall for each activity:
+[   sitting,    walking,    jumping,    running ]
+[ 0.94968848  0.80273551  0.77967278  0.79901718]
+```
+
+This is slightly worse than when run on the sample data, but that's attributable to there being more sample datapoints than observed ones.
+
+Here's the same values for the provided sample data:
+```
+average accuracy:
+0.94165621079
+average precision:
+[ 0.92993968  0.94734665 ]
+average recall:
+[ 0.89305838  0.96627251 ]
+```
+
+The sample data also has half as many labels, so our classifier should have a much higher random success rate (1/2 vs 1/4), so this likely also contributes to the sample data's higher numbers.
+
+Empirically, our classifier trained on our data works really well!  When running activity recognition, it takes a few datapoints to get itself going, and subsequently is pretty much spot-on.  It occasionally has trouble differentiating running from walking, but it's correct the vast majority of the time.  I'd say that the activity/precision/recall matches up to the empirical recognition data.
