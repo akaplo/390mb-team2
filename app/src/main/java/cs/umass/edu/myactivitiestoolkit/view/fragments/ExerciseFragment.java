@@ -84,11 +84,11 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
     LocalBroadcastManager mBroadcastManager;
 
     // Label for each activity
-    public static int NO_LABEL = -1;
-    public static int SIT_LABEL = 0;
-    public static int WALK_LABEL = 1;
-    public static int JUMP_LABEL = 2;
-    public static int RUN_LABEL = 3;
+    public final static int NO_LABEL = -1;
+    public final static int SIT_LABEL = 0;
+    public final static int WALK_LABEL = 1;
+    public final static int JUMP_LABEL = 2;
+    public final static int RUN_LABEL = 3;
 
     /** Used during debugging to identify logs by class. */
     @SuppressWarnings("unused")
@@ -110,7 +110,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
     private TextView txtServerStepCount;
 
     /** Displays the activity identified by your server-side activity classification algorithm. **/
-    private TextView txtActivity;
+    private TextView mActivityTV;
 
     /** The plot which displays the PPG data in real-time. **/
     private XYPlot mPlot;
@@ -225,6 +225,10 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
                         mPeakTimestamps.add(timestamp);
                         mPeakValues.add(values[2]); //place on z-axis signal
                     }
+                } else if (intent.getAction().equals(Constants.ACTION.BROADCAST_ACTIVITY)) {
+                    String activity = intent.getStringExtra(Constants.ACTION.ACTIVITY_NAME);
+                    activity = getStringLabelFromDouble(Double.parseDouble(activity));
+                    mActivityTV.setText(activity);
                 }
             }
         }
@@ -250,8 +254,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         txtServerStepCount = (TextView) view.findViewById(R.id.txtServerStepCount);
 
         //obtain reference to the activity text field
-
-        //txtActivity deleted
+        mActivityTV = (TextView) view.findViewById(R.id.tv_recognized_activity);
 
         //obtain references to the on/off switches and handle the toggling appropriately
         switchAccelerometer = (Switch) view.findViewById(R.id.switchAccelerometer);
@@ -356,6 +359,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         filter.addAction(Constants.ACTION.BROADCAST_ACCELEROMETER_PEAK);
         filter.addAction(Constants.ACTION.BROADCAST_ANDROID_STEP_COUNT);
         filter.addAction(Constants.ACTION.BROADCAST_LOCAL_STEP_COUNT);
+        filter.addAction(Constants.ACTION.BROADCAST_ACTIVITY);
         mBroadcastManager.registerReceiver(receiver, filter);
     }
 
@@ -462,6 +466,23 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
             case "Jump": return JUMP_LABEL;
             case "Run": return RUN_LABEL;
             default: return Integer.MIN_VALUE;
+        }
+    }
+
+    /**
+     * Given the numerical representation of an activity,
+     * return a string that described it in English.
+     * @param label - double, the activity we want to stringify
+     * @return String
+     */
+    private String getStringLabelFromDouble(double label) {
+        switch ((int) label) {
+            case NO_LABEL: return "No Label";
+            case SIT_LABEL: return "Sitting";
+            case WALK_LABEL: return "Walking";
+            case JUMP_LABEL: return "Jumping";
+            case RUN_LABEL: return "Running";
+            default: return "Unable to determine label.";
         }
     }
 

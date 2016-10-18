@@ -171,8 +171,14 @@ public class AccelerometerService extends SensorService implements SensorEventLi
                     e.printStackTrace();
                     return;
                 }
-                // TODO : broadcast activity to UI
-
+                // TODO A2 Pt 4: broadcast activity to UI
+                if (activity != null) {
+                    Log.d(TAG, "Received predicted activity from server: " + activity);
+                    Intent i = new Intent();
+                    i.putExtra(Constants.ACTION.ACTIVITY_NAME, activity);
+                    i.setAction(Constants.ACTION.BROADCAST_ACTIVITY);
+                    mBroadcastManager.sendBroadcast(i);
+                }
             }
         });
     }

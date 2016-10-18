@@ -28,6 +28,7 @@ public class Constants {
         String NAVIGATE_TO_APP = "edu.umass.cs.my-activities-toolkit.action.navigate-to-app";
         String BROADCAST_LABEL_CHANGE = "label_change";
         String LABEL = "label";
+        String ACTIVITY_NAME = "activity_name";
     }
 
 
