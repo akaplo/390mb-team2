@@ -210,11 +210,6 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
-<<<<<<< HEAD
-    //interface sends which activity is clicked to accelerometer service
-    public interface sendActivity extends Serializable{
-        void sender(int x);
-    }
 
 
     public void sitClicked(View v){
@@ -238,8 +233,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-=======
->>>>>>> 25befd8bd937ea8564b0009c7f825d2ac2fffb4b
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

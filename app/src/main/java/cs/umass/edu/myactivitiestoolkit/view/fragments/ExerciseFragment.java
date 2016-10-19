@@ -435,7 +435,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         XYSeries zSeries = new SimpleXYSeries(new ArrayList<>(mTimestamps), new ArrayList<>(mZValues), "Z");
 
         XYSeries peaks = new SimpleXYSeries(new ArrayList<>(mPeakTimestamps), new ArrayList<>(mPeakValues), "PEAKS");
-
+        
         //redraw the plot:
         mPlot.clear();
         mPlot.addSeries(xSeries, mXSeriesFormatter);
