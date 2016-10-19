@@ -83,11 +83,12 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
 
     LocalBroadcastManager mBroadcastManager;
 
-    public static int NO_LABEL = -1;
-    public static int SIT_LABEL = 0;
-    public static int WALK_LABEL = 1;
-    public static int JUMP_LABEL = 2;
-    public static int RUN_LABEL = 3;
+    // Label for each activity
+    public final static int NO_LABEL = -1;
+    public final static int SIT_LABEL = 0;
+    public final static int WALK_LABEL = 1;
+    public final static int JUMP_LABEL = 2;
+    public final static int RUN_LABEL = 3;
 
     /** Used during debugging to identify logs by class. */
     @SuppressWarnings("unused")
@@ -109,7 +110,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
     private TextView txtServerStepCount;
 
     /** Displays the activity identified by your server-side activity classification algorithm. **/
-    private TextView txtActivity;
+    private TextView mActivityTV;
 
     /** The plot which displays the PPG data in real-time. **/
     private XYPlot mPlot;
@@ -224,6 +225,10 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
                         mPeakTimestamps.add(timestamp);
                         mPeakValues.add(values[2]); //place on z-axis signal
                     }
+                } else if (intent.getAction().equals(Constants.ACTION.BROADCAST_ACTIVITY)) {
+                    String activity = intent.getStringExtra(Constants.ACTION.ACTIVITY_NAME);
+                    activity = getStringLabelFromDouble(Double.parseDouble(activity));
+                    mActivityTV.setText(activity);
                 }
             }
         }
@@ -249,8 +254,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         txtServerStepCount = (TextView) view.findViewById(R.id.txtServerStepCount);
 
         //obtain reference to the activity text field
-
-        //txtActivity deleted
+        mActivityTV = (TextView) view.findViewById(R.id.tv_recognized_activity);
 
         //obtain references to the on/off switches and handle the toggling appropriately
         switchAccelerometer = (Switch) view.findViewById(R.id.switchAccelerometer);
@@ -307,6 +311,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         mPeakSeriesFormatter = new LineAndPointFormatter(null, Color.BLUE, null, null);
         mPeakSeriesFormatter.getVertexPaint().setStrokeWidth(PixelUtils.dpToPix(10)); //enlarge the peak points
 
+        // "Spinner" is the dropdown box on the UI - a terrible class name
         Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
@@ -315,6 +320,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
+        // Specify that this class (see onItemSelected below) is the desired listener
         spinner.setOnItemSelectedListener(this);
 
         return view;
@@ -353,6 +359,7 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         filter.addAction(Constants.ACTION.BROADCAST_ACCELEROMETER_PEAK);
         filter.addAction(Constants.ACTION.BROADCAST_ANDROID_STEP_COUNT);
         filter.addAction(Constants.ACTION.BROADCAST_LOCAL_STEP_COUNT);
+        filter.addAction(Constants.ACTION.BROADCAST_ACTIVITY);
         mBroadcastManager.registerReceiver(receiver, filter);
     }
 
@@ -445,36 +452,68 @@ public class ExerciseFragment extends Fragment implements AdapterView.OnItemSele
         mPlot.redraw();
     }
 
+    /**
+     * Given an activity, return an int that can
+     * be sent to the data collection server.
+     * @param label: String - one of the options in the dropdown on the UI
+     * @return int - the integer representation of the input
+     */
     private int getLabelFromString(String label) {
-        if (label.equals("No Label")) {
-            return NO_LABEL;
+        switch (label) {
+            case "No Label": return  NO_LABEL;
+            case "Sit": return SIT_LABEL;
+            case "Walk": return WALK_LABEL;
+            case "Jump": return JUMP_LABEL;
+            case "Run": return RUN_LABEL;
+            default: return Integer.MIN_VALUE;
         }
-        else if (label.equals("Sit")) {
-            return SIT_LABEL;
-        }
-        else if (label.equals("Walk")) {
-            return WALK_LABEL;
-        }
-        else if (label.equals("Jump")) {
-            return JUMP_LABEL;
-        }
-        else if (label.equals("Run")) {
-            return  RUN_LABEL;
-        }
-        else return Integer.MIN_VALUE;
     }
 
+    /**
+     * Given the numerical representation of an activity,
+     * return a string that described it in English.
+     * @param label - double, the activity we want to stringify
+     * @return String
+     */
+    private String getStringLabelFromDouble(double label) {
+        switch ((int) label) {
+            case NO_LABEL: return "No Label";
+            case SIT_LABEL: return "Sitting";
+            case WALK_LABEL: return "Walking";
+            case JUMP_LABEL: return "Jumping";
+            case RUN_LABEL: return "Running";
+            default: return "Unable to determine label.";
+        }
+    }
+
+    /**
+     * Callback function for when the user has selected an activity
+     * from the dropdown on the UI.
+     * Required to implement as part of AdapterView.OnItemSelected interface.
+     */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        // An item was selected. You can retrieve the selected item using
-        // parent.getItemAtPosition(pos)
+        // An item was selected. Retrieve the selected item using
+        // parent.getItemAtPosition(position)
         Log.d(TAG, parent.getItemAtPosition(position).toString());
+        // Prepare an Intent that will be broadcast to
+        // anyone that cares about label updates.
         Intent i = new Intent();
+        // Anyone listening for label changes
+        // will use a filter to look for this action:
         i.setAction(Constants.ACTION.BROADCAST_LABEL_CHANGE);
-        i.putExtra(Constants.ACTION.LABEL, getLabelFromString(parent.getItemAtPosition(position).toString()));
+        // Turn the name of the activity into an int
+        int label = getLabelFromString(parent.getItemAtPosition(position).toString());
+        // Stick that int into the Intent
+        i.putExtra(Constants.ACTION.LABEL, label);
+        // Broadcast the Intent to anyone listening.
         mBroadcastManager.sendBroadcast(i);
     }
 
+    /**
+     * Required to implement as part of AdapterView.OnItemSelected interface.
+     * Not needed by us, though.
+     */
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         // do nothing
