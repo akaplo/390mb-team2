@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Gravity;
@@ -109,14 +111,22 @@ public class PPGService extends SensorService implements PPGListener
         broadcastMessage(Constants.MESSAGE.PPG_SERVICE_STOPPED);
     }
 
+    private SensorManager mSensorManager;
+    private Sensor ppgSensor;
+
+
     @Override
     protected void registerSensors() {
         // TODO: Register a PPG listener with the PPG sensor (mPPGSensor)
+        mPPGSensor.registerListener(this);
+
+
     }
 
     @Override
     protected void unregisterSensors() {
         // TODO: Unregister the PPG listener
+        mPPGSensor.unregisterListener(this);
     }
 
     @Override
@@ -156,10 +166,26 @@ public class PPGService extends SensorService implements PPGListener
      * @see HRSensorReading
      */
     @SuppressWarnings("deprecation")
+
+    public Filter filter = new Filter(10);
+    public double[] FValues;
+    public float[] filterValues(float[] values){
+        FValues = filter.getFilteredValues(values); //returns array of doubles
+        float[] ret = new float[FValues.length];
+        for(int i=0; i<FValues.length;i++){
+            ret[i]=(float)FValues[i];
+        }
+        return ret;
+    }
+
     @Override
     public void onSensorChanged(PPGEvent event) {
+
         // TODO: Smooth the signal using a Butterworth / exponential smoothing filter
+
         // TODO: send the data to the UI fragment for visualization, using broadcastPPGReading(...)
+        broadcastPPGReading(event.timestamp, event.value);
+
         // TODO: Send the filtered mean red value to the server
         // TODO: Buffer data if necessary for your algorithm
         // TODO: Call your heart beat and bpm detection algorithm
