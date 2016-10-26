@@ -13,13 +13,9 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Locale;
 
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
@@ -122,9 +118,10 @@ public class AccelerometerService extends SensorService implements SensorEventLi
     public double[] FValues;
     public StepDetector stepDetector = new StepDetector();
     public OnStepListener stepListener;
-    private int stepCount=0;
-    LocalBroadcastManager mBroadcastManager;
+    private int mLocalStepCount = 0;
+    private int mServerStepCount = 0;
 
+    LocalBroadcastManager mBroadcastManager;
 
     @Override
     protected void onServiceStarted() {
@@ -154,7 +151,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
                     JSONObject data = json.getJSONObject("data");
                     long timestamp = data.getLong("timestamp");
                     Log.d(TAG, "Step occurred at " + timestamp + ".");
-                    stepCount++;
+                    mServerStepCount++;
+                    broadcastServerStepCount();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -323,13 +321,13 @@ public class AccelerometerService extends SensorService implements SensorEventLi
             }
             //TODO: broadcast the accelerometer reading to the UI
             broadcastAccelerometerReading(timestamp_in_milliseconds, filterValues(event.values));
-            broadcastStepDetected(timestamp_in_milliseconds,filterValues(event.values));
+            //broadcastStepDetected(timestamp_in_milliseconds,filterValues(event.values));
         }else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
 
             // we received a step event detected by the built-in Android step detector (assignment 1)
             broadcastAndroidStepCount(mAndroidStepCount++);
-            //stepCount increased in two places
-            broadcastLocalStepCount(stepCount++);
+            //mLocalStepCount increased in two places
+//            broadcastLocalStepCount(mLocalStepCount++);
 
         } else {
 
@@ -365,7 +363,7 @@ public class AccelerometerService extends SensorService implements SensorEventLi
      */
     public void broadcastAndroidStepCount(int stepCount) {
         Intent intent = new Intent();
-        intent.putExtra(Constants.KEY.STEP_COUNT, stepCount);
+        intent.putExtra(Constants.KEY.LOCAL_STEP_COUNT, stepCount);
         intent.setAction(Constants.ACTION.BROADCAST_ANDROID_STEP_COUNT);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.sendBroadcast(intent);
@@ -377,10 +375,18 @@ public class AccelerometerService extends SensorService implements SensorEventLi
      */
     public void broadcastLocalStepCount(int stepCount) {
         Intent intent = new Intent();
-        intent.putExtra(Constants.KEY.STEP_COUNT, stepCount);
+        intent.putExtra(Constants.KEY.LOCAL_STEP_COUNT, stepCount);
         intent.setAction(Constants.ACTION.BROADCAST_LOCAL_STEP_COUNT);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.sendBroadcast(intent);
+    }
+
+    public void broadcastServerStepCount() {
+        Intent i = new Intent();
+        i.putExtra(Constants.KEY.SERVER_STEP_COUNT, mServerStepCount);
+        i.setAction(Constants.ACTION.BROADCAST_SERVER_STEP_COUNT);
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        manager.sendBroadcast(i);
     }
 
 
@@ -435,6 +441,8 @@ public class AccelerometerService extends SensorService implements SensorEventLi
         // TODO uncomment below when testing step detection algorithm to send
         // data to UI
          //broadcastStepDetected(timestamp, values);
+        mLocalStepCount++;
+        onStepCountUpdated(mLocalStepCount);
 
     }
 }
