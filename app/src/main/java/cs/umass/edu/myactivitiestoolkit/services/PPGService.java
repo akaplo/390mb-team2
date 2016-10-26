@@ -12,6 +12,9 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.WindowManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.ppg.HRSensorReading;
 import cs.umass.edu.myactivitiestoolkit.ppg.PPGSensorReading;
@@ -184,12 +187,73 @@ public class PPGService extends SensorService implements PPGListener
         // TODO: Smooth the signal using a Butterworth / exponential smoothing filter
 
         // TODO: send the data to the UI fragment for visualization, using broadcastPPGReading(...)
-        broadcastPPGReading(event.timestamp, event.value);
+        double [] f = filter.getFilteredValues((float)event.value);
+        broadcastPPGReading(event.timestamp, f[0]);
+
 
         // TODO: Send the filtered mean red value to the server
+        //mClient.sendSensorReading(mPPGSensor);
         // TODO: Buffer data if necessary for your algorithm
         // TODO: Call your heart beat and bpm detection algorithm
+        BPMdetection(event.timestamp, f[0]);
         // TODO: Send your heart rate estimate to the server
+    }
+
+    private double totalValue =0;
+    private List<Long> time = new ArrayList<>();
+    private List<Double> values = new ArrayList<>();
+
+    public void BPMdetection(long timestamp, double value){
+        time.add(timestamp);
+        values.add(value);
+        totalValue+=value;
+        long latest = time.get(0);
+        //while the least recent timestamp is over 6 seconds ago
+        //remove the least recent timestamp and the corresponding value
+        while(latest+6000<timestamp){
+            time.remove(0);
+            latest = time.get(0);
+            totalValue-=values.get(0);
+            values.remove(0);
+        }
+        Log.d("size",""+time.size()+ "  " + values.size());
+        //calculating the mean, variance, stdDev
+        double mean = totalValue / values.size();
+        double temp =0;
+        for(int i =0; i<values.size(); i++){
+            temp += ((values.get(i)-mean) * (values.get(i)-mean));
+        }
+        double variance = temp / values.size();
+        double stdDev = Math.sqrt(variance);
+        //getting the slope roughly by comparing times and values 10 units apart
+        //the size of the arrays can vary a lot. It usually starts off staying around 110(size)
+        //but can quickly drop to 50 or below
+        List<Double> slopes = new ArrayList<>();
+        for(int i = values.size(); i>10; i--){
+            double slope = values.get(i-10) - values.get(i-1);
+            slopes.add(slope / (time.get(i-10) - time.get(i-1)));
+        }
+
+        //lastTrue is used to make sure slope values next to each other do not get counted twice for BPM
+        int BPM=0;
+        boolean lastTrue=false;
+        for(int i =1; i<slopes.size(); i++){
+
+            //arbitrary value. Changing it doesn't seem to do much
+            if(slopes.get(i)>0.00000025){
+                if(!lastTrue) {
+                    lastTrue = true;
+                    BPM++;
+                }
+            }
+            else{
+                lastTrue=false;
+            }
+        }
+
+        //times 10 because this is over a 6 second window
+        broadcastBPM(BPM*10);
+        Log.d("BPM",""+BPM);
     }
 
     /**
