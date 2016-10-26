@@ -183,7 +183,7 @@ public class PPGService extends SensorService implements PPGListener
 
     @Override
     public void onSensorChanged(PPGEvent event) {
-
+        Log.d(TAG, "Received PPGEvent");
         // TODO: Smooth the signal using a Butterworth / exponential smoothing filter
 
         // TODO: send the data to the UI fragment for visualization, using broadcastPPGReading(...)
@@ -192,7 +192,7 @@ public class PPGService extends SensorService implements PPGListener
 
 
         // TODO: Send the filtered mean red value to the server
-        //mClient.sendSensorReading(mPPGSensor);
+        mClient.sendSensorReading(new PPGSensorReading(mUserID, "MOBILE", "", event.timestamp, event.value));
         // TODO: Buffer data if necessary for your algorithm
         // TODO: Call your heart beat and bpm detection algorithm
         BPMdetection(event.timestamp, f[0]);
