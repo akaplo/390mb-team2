@@ -27,7 +27,11 @@ public class Constants {
         String START_SERVICE = "edu.umass.cs.my-activities-toolkit.action.start-service";
         String STOP_SERVICE = "edu.umass.cs.my-activities-toolkit.action.stop-service";
         String NAVIGATE_TO_APP = "edu.umass.cs.my-activities-toolkit.action.navigate-to-app";
+        String BROADCAST_LABEL_CHANGE = "label_change";
+        String LABEL = "label";
+        String ACTIVITY_NAME = "activity_name";
     }
+
 
     /**
      * Unique IDs associated with each service notification.
