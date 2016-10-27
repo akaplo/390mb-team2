@@ -170,7 +170,7 @@ public class PPGService extends SensorService implements PPGListener
      */
     @SuppressWarnings("deprecation")
 
-    public Filter filter = new Filter(10);
+    public Filter filter = new Filter(5);
     public double[] FValues;
     public float[] filterValues(float[] values){
         FValues = filter.getFilteredValues(values); //returns array of doubles
@@ -208,9 +208,9 @@ public class PPGService extends SensorService implements PPGListener
         values.add(value);
         totalValue+=value;
         long latest = time.get(0);
-        //while the least recent timestamp is over 6 seconds ago
+        //while the least recent timestamp is over 10 seconds ago
         //remove the least recent timestamp and the corresponding value
-        while(latest+6000<timestamp){
+        while(latest+10000<timestamp){
             time.remove(0);
             latest = time.get(0);
             totalValue-=values.get(0);
@@ -226,34 +226,72 @@ public class PPGService extends SensorService implements PPGListener
         double variance = temp / values.size();
         double stdDev = Math.sqrt(variance);
         //getting the slope roughly by comparing times and values 10 units apart
-        //the size of the arrays can vary a lot. It usually starts off staying around 110(size)
+        //the size of the arrays can vary a lot. It usually starts off staying around 200(size)
         //but can quickly drop to 50 or below
         List<Double> slopes = new ArrayList<>();
-        for(int i = values.size(); i>10; i--){
-            double slope = values.get(i-10) - values.get(i-1);
-            slopes.add(slope / (time.get(i-10) - time.get(i-1)));
+        for(int i = 0; i<values.size()-10; i++){
+            double slope = values.get(i) - values.get(i+10);
+            slopes.add(slope / (time.get(i) - time.get(i+10)));
         }
 
-        //lastTrue is used to make sure slope values next to each other do not get counted twice for BPM
-        int BPM=0;
-        boolean lastTrue=false;
-        for(int i =1; i<slopes.size(); i++){
 
-            //arbitrary value. Changing it doesn't seem to do much
-            if(slopes.get(i)>0.00000025){
-                if(!lastTrue) {
-                    lastTrue = true;
-                    BPM++;
+        int BPMPos=0;
+        long timeofLastBeat = 0;
+        boolean slopePositive = false;
+        for(int i =0; i<slopes.size(); i++){
+
+            //if the slope is greater than one and the previous slope was not positive, then it counts as a beat.
+            //if the interval between slope changes is greater than .35 seconds it is valid
+
+            if(slopes.get(i)>0){
+                if(!slopePositive) {
+                    slopePositive = true;
+                    if(time.get(i)-350>timeofLastBeat){
+                        BPMPos++;
+                        timeofLastBeat = time.get(i);
+                    }
                 }
             }
             else{
-                lastTrue=false;
+                slopePositive=false;
             }
         }
 
-        //times 10 because this is over a 6 second window
-        broadcastBPM(BPM*10);
-        Log.d("BPM",""+BPM);
+        //if the slope in the beginning of the window is positive at first it will miss the first peak.
+        //comparing it to the negative changes should just increase the count by one(or not) in this case.
+        //might be more accurate 50% of the time.
+
+        int BPMNeg=0;
+        timeofLastBeat = 0;
+        boolean slopeNegative = false;
+        for(int i =0; i<slopes.size(); i++){
+
+            //if the slope is greater than one and the previous slope was not positive, then it counts as a beat.
+            //if the interval between slope changes is greater than .35 seconds it is valid
+
+            if(slopes.get(i)<0){
+                if(!slopeNegative) {
+                    slopeNegative = true;
+                    if(time.get(i)-350>timeofLastBeat){
+                        BPMNeg++;
+                        timeofLastBeat = time.get(i);
+                    }
+                }
+            }
+            else{
+                slopeNegative=false;
+            }
+        }
+
+        //times 6 because this is over a 10 second window
+        if(BPMNeg>BPMPos){
+            broadcastBPM(BPMNeg*6);
+            Log.d("BPMneg",""+BPMNeg);
+        }
+        else{
+            broadcastBPM(BPMPos*6);
+            Log.d("BPMpos",""+BPMPos);
+        }
     }
 
     /**
