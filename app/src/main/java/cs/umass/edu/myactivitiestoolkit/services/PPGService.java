@@ -196,12 +196,14 @@ public class PPGService extends SensorService implements PPGListener
         // TODO: Buffer data if necessary for your algorithm
         // TODO: Call your heart beat and bpm detection algorithm
         BPMdetection(event.timestamp, f[0]);
+        mClient.sendSensorReading(new HRSensorReading(mUserID, "MOBILE", "", event.timestamp, BPM));
         // TODO: Send your heart rate estimate to the server
     }
 
     private double totalValue =0;
     private List<Long> time = new ArrayList<>();
     private List<Double> values = new ArrayList<>();
+    private double BPM =0;
 
     public void BPMdetection(long timestamp, double value){
         time.add(timestamp);
@@ -287,10 +289,12 @@ public class PPGService extends SensorService implements PPGListener
         if(BPMNeg>BPMPos){
             broadcastBPM(BPMNeg*6);
             Log.d("BPMneg",""+BPMNeg);
+            BPM = BPMNeg*6;
         }
         else{
             broadcastBPM(BPMPos*6);
             Log.d("BPMpos",""+BPMPos);
+            BPM = BPMPos*6;
         }
     }
 
