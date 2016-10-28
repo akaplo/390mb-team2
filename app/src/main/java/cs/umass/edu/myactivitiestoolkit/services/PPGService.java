@@ -169,8 +169,8 @@ public class PPGService extends SensorService implements PPGListener
      * @see HRSensorReading
      */
     @SuppressWarnings("deprecation")
-
-    public Filter filter = new Filter(5);
+    //Filter(1) works even better, not sure it is just because it counts things other than beats.
+    public Filter filter = new Filter(3);
     public double[] FValues;
     public float[] filterValues(float[] values){
         FValues = filter.getFilteredValues(values); //returns array of doubles
@@ -251,6 +251,8 @@ public class PPGService extends SensorService implements PPGListener
                     if(time.get(i)-350>timeofLastBeat){
                         BPMPos++;
                         timeofLastBeat = time.get(i);
+                        //broadcasting the peak makes the graph not work correctly but you can see where it counts beats.
+                        //broadcastPeak(time.get(i),values.get(i));
                     }
                 }
             }
@@ -277,6 +279,8 @@ public class PPGService extends SensorService implements PPGListener
                     if(time.get(i)-350>timeofLastBeat){
                         BPMNeg++;
                         timeofLastBeat = time.get(i);
+                        //broadcasting the peak makes the graph not work correctly but you can see where it counts beats.
+                        //broadcastPeak(time.get(i),values.get(i));
                     }
                 }
             }
