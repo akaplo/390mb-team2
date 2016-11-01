@@ -210,6 +210,30 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
+
+
+    public void sitClicked(View v){
+        Intent intent = new Intent(AccelerometerService.class.getName());
+        intent.putExtra("activity",0);
+        this.getApplicationContext().startService(intent);
+        this.getBaseContext().startService(intent);
+        this.startService(intent);
+
+        Log.d("sitclicked","main");
+
+
+    }
+    public void walkClicked(View v){
+
+    }
+    public void jumpClicked(View v){
+
+    }
+    public void runClicked(View v){
+
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

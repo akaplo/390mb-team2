@@ -5,10 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.WindowManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.ppg.HRSensorReading;
@@ -109,14 +114,22 @@ public class PPGService extends SensorService implements PPGListener
         broadcastMessage(Constants.MESSAGE.PPG_SERVICE_STOPPED);
     }
 
+    private SensorManager mSensorManager;
+    private Sensor ppgSensor;
+
+
     @Override
     protected void registerSensors() {
         // TODO: Register a PPG listener with the PPG sensor (mPPGSensor)
+        mPPGSensor.registerListener(this);
+
+
     }
 
     @Override
     protected void unregisterSensors() {
         // TODO: Unregister the PPG listener
+        mPPGSensor.unregisterListener(this);
     }
 
     @Override
@@ -156,14 +169,137 @@ public class PPGService extends SensorService implements PPGListener
      * @see HRSensorReading
      */
     @SuppressWarnings("deprecation")
+    //Filter(1) works even better, not sure it is just because it counts things other than beats.
+    public Filter filter = new Filter(3);
+    public double[] FValues;
+    public float[] filterValues(float[] values){
+        FValues = filter.getFilteredValues(values); //returns array of doubles
+        float[] ret = new float[FValues.length];
+        for(int i=0; i<FValues.length;i++){
+            ret[i]=(float)FValues[i];
+        }
+        return ret;
+    }
+
     @Override
     public void onSensorChanged(PPGEvent event) {
+        Log.d(TAG, "Received PPGEvent");
         // TODO: Smooth the signal using a Butterworth / exponential smoothing filter
+
         // TODO: send the data to the UI fragment for visualization, using broadcastPPGReading(...)
+        double [] f = filter.getFilteredValues((float)event.value);
+        broadcastPPGReading(event.timestamp, f[0]);
+
+
         // TODO: Send the filtered mean red value to the server
+        mClient.sendSensorReading(new PPGSensorReading(mUserID, "MOBILE", "", event.timestamp, event.value));
         // TODO: Buffer data if necessary for your algorithm
         // TODO: Call your heart beat and bpm detection algorithm
+        BPMdetection(event.timestamp, f[0]);
+        mClient.sendSensorReading(new HRSensorReading(mUserID, "MOBILE", "", event.timestamp, BPM));
         // TODO: Send your heart rate estimate to the server
+    }
+
+    private double totalValue =0;
+    private List<Long> time = new ArrayList<>();
+    private List<Double> values = new ArrayList<>();
+    private double BPM =0;
+
+    public void BPMdetection(long timestamp, double value){
+        time.add(timestamp);
+        values.add(value);
+        totalValue+=value;
+        long latest = time.get(0);
+        //while the least recent timestamp is over 10 seconds ago
+        //remove the least recent timestamp and the corresponding value
+        while(latest+10000<timestamp){
+            time.remove(0);
+            latest = time.get(0);
+            totalValue-=values.get(0);
+            values.remove(0);
+        }
+        Log.d("size",""+time.size()+ "  " + values.size());
+        //calculating the mean, variance, stdDev
+        double mean = totalValue / values.size();
+        double temp =0;
+        for(int i =0; i<values.size(); i++){
+            temp += ((values.get(i)-mean) * (values.get(i)-mean));
+        }
+        double variance = temp / values.size();
+        double stdDev = Math.sqrt(variance);
+        //getting the slope roughly by comparing times and values 10 units apart
+        //the size of the arrays can vary a lot. It usually starts off staying around 200(size)
+        //but can quickly drop to 50 or below
+        List<Double> slopes = new ArrayList<>();
+        for(int i = 0; i<values.size()-10; i++){
+            double slope = values.get(i) - values.get(i+10);
+            slopes.add(slope / (time.get(i) - time.get(i+10)));
+        }
+
+
+        int BPMPos=0;
+        long timeofLastBeat = 0;
+        boolean slopePositive = false;
+        for(int i =0; i<slopes.size(); i++){
+
+            //if the slope is greater than one and the previous slope was not positive, then it counts as a beat.
+            //if the interval between slope changes is greater than .35 seconds it is valid
+
+            if(slopes.get(i)>0){
+                if(!slopePositive) {
+                    slopePositive = true;
+                    if(time.get(i)-350>timeofLastBeat){
+                        BPMPos++;
+                        timeofLastBeat = time.get(i);
+                        //broadcasting the peak makes the graph not work correctly but you can see where it counts beats.
+                        //broadcastPeak(time.get(i),values.get(i));
+                    }
+                }
+            }
+            else{
+                slopePositive=false;
+            }
+        }
+
+        //if the slope in the beginning of the window is positive at first it will miss the first peak.
+        //comparing it to the negative changes should just increase the count by one(or not) in this case.
+        //might be more accurate 50% of the time.
+
+        int BPMNeg=0;
+        timeofLastBeat = 0;
+        boolean slopeNegative = false;
+        for(int i =0; i<slopes.size(); i++){
+
+            //if the slope is greater than one and the previous slope was not positive, then it counts as a beat.
+            //if the interval between slope changes is greater than .35 seconds it is valid
+
+            if(slopes.get(i)<0){
+                if(!slopeNegative) {
+                    slopeNegative = true;
+                    if(time.get(i)-350>timeofLastBeat){
+                        BPMNeg++;
+                        timeofLastBeat = time.get(i);
+                        //broadcasting the peak makes the graph not work correctly but you can see where it counts beats.
+                        //broadcastPeak(time.get(i),values.get(i));
+                    }
+                }
+            }
+            else{
+                slopeNegative=false;
+            }
+        }
+
+        //times 6 because this is over a 10 second window
+        if(BPMNeg>BPMPos){
+            broadcastBPM(BPMNeg*6);
+            Log.d("BPMneg",""+BPMNeg);
+            BPM = BPMNeg*6;
+        }
+        else{
+            broadcastBPM(BPMPos*6);
+            Log.d("BPMpos",""+BPMPos);
+            BPM = BPMPos*6;
+        }
     }
 
     /**

@@ -111,8 +111,6 @@ public class StepDetector implements SensorEventListener {
 
         //If the current point is greater than the average and the last one was less
         if ((combined >= average) && (side < 0)) {
-            Log.d(TAG, "timestamp: " + timestamp);
-            Log.d(TAG, "lestest: " + latest);
             // If the difference between this 0-crossing and the last one is in the step range
             if (((timestamp - latest)/1000000 < 750) && ((timestamp - latest)/1000000 > 315)) {
                 onStepDetected(timestamp, filteredValues);
@@ -124,7 +122,7 @@ public class StepDetector implements SensorEventListener {
 
         // If the current point is less than the average and the last one was greater
         if ((combined <= average) && side > 0) {
-            Log.d(TAG, timestamp - latest + "");
+           // Log.d(TAG, timestamp - latest + "");
             // If the difference between this 0-crossing and the last one is in the step range
             if (((timestamp - latest)/1000000 < 750) && ((timestamp - latest)/1000000 > 315)) {
                 onStepDetected(timestamp, filteredValues);
