@@ -22,6 +22,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
 import cs.umass.edu.myactivitiestoolkit.services.AudioService;
@@ -61,6 +63,10 @@ public class AudioFragment extends Fragment {
 
     private TextView mSpeakerTV;
 
+    private String mSpeakerPrediction;
+
+    private ArrayList<Integer> mPredictionBuffer = new ArrayList<>();
+
     /**
      * The receiver listens for messages from the {@link AccelerometerService}, e.g. was the
      * service started/stopped, and updates the status views accordingly. It also
@@ -80,7 +86,30 @@ public class AudioFragment extends Fragment {
                     updateSpectrogram(spectrogram);
                 }
                  else if (intent.getAction().equals(Constants.ACTION.BROADCAST_SERVER_SPEAKER_PREDICTION)) {
-                    mSpeakerTV.setText(intent.getStringExtra(Constants.KEY.SERVER_SPEAKER_PREDICTION));
+                    Integer prediction = Integer.parseInt(intent.getStringExtra(Constants.KEY.SERVER_SPEAKER_PREDICTION));
+                    if (mPredictionBuffer.size() < 10) {
+                        mPredictionBuffer.add(prediction);
+                    }
+                    else {
+                        int sum = 0;
+                        for (Integer p : mPredictionBuffer) {
+                            sum += p;
+                        }
+                        int average = sum / mPredictionBuffer.size();
+                        switch (average) {
+                            case 0: mSpeakerPrediction = "Aaron";
+                                break;
+                            case 1: mSpeakerPrediction = "Todd";
+                                break;
+                            case 2: mSpeakerPrediction = "Dan";
+                                break;
+                            case 3: mSpeakerPrediction = "No Speaker";
+                                break;
+                            default: mSpeakerPrediction = "Unexpected value";
+                        }
+                        mSpeakerTV.setText(mSpeakerPrediction);
+                        mPredictionBuffer.remove(0);
+                    }
                 }
             }
         }
@@ -140,6 +169,7 @@ public class AudioFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION.BROADCAST_MESSAGE);
         filter.addAction(Constants.ACTION.BROADCAST_SPECTROGRAM);
+        filter.addAction(Constants.ACTION.BROADCAST_SERVER_SPEAKER_PREDICTION);
         broadcastManager.registerReceiver(receiver, filter);
     }
 
