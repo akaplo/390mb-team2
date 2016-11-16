@@ -45,13 +45,13 @@ public class AudioBufferReading extends SensorReading {
         JSONObject data = new JSONObject();
         try {
             data.put("t", timestamp);
-            JSONArray audioBuffer = new JSONArray(buffer);
+            JSONArray audioBuffer = new JSONArray();
+            audioBuffer.put(buffer);
             data.put("values", audioBuffer);
             obj.put("data", data);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         return obj;
     }
 }
