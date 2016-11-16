@@ -398,44 +398,22 @@ public class LocationsFragment extends Fragment {
      * @param k the number of clusters.
      */
     private void runKMeans(final GPSLocation[] locations, final int k){
-        client.registerMessageReceiver(new MessageReceiver() {
+        client.registerMessageReceiver(new MessageReceiver(Constants.MHLClientFilter.CLUSTER) {
             @Override
             protected void onMessageReceived(JSONObject json) {
-                final Map<Integer, Cluster<GPSLocation>> clusters = new ArrayMap<>();
+                Map<Integer, Cluster<GPSLocation>> clusters = new ArrayMap<>();
                 try {
-                    // These few lines of code parse the String object containing
-                    // the indexes.
-                    String str = json.getString("indexes");
-                    String[] indexList = str.substring(1, str.length()-1).split(",");
-                    int[] indexes = new int[indexList.length];
-                    for (int i = 0; i < indexList.length; i++){
-                        indexes[i] = Integer.parseInt(indexList[i].replace("\"", "").trim());
+                    JSONArray indexes = json.getJSONArray("indexes");
+                    //TODO: Using the cluster index of each location, generate a list of k clusters, then call drawClusters()
+                    for (int i = 0; i < indexes.length(); i++) {
+                        int index = indexes.getInt(i);
                     }
-
-
-                    for (int i = 0; i < indexes.length; i++) {
-                        int index = indexes[i];
-                        //TODO: Using the index of each location, generate a list of k clusters, then call drawClusters().
-                        //You may choose to use the Map defined above or find a different way of doing it.
-                    }
-
-                    // We are only allowed to manipulate the map on the main (UI) thread:
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            drawClusters(clusters.values());
-                        }
-                    });
-
                 } catch (JSONException e) {
                     e.printStackTrace();
-                } finally {
-                    client.unregisterMessageReceiver(this);
                 }
             }
         });
-        client.connect();
-        client.sendSensorReading(new ClusteringRequest(userID, "", "", System.currentTimeMillis(), locations, "k_means", k));
+        client.sendSensorReading(new ClusteringRequest(userID, "", "", System.currentTimeMillis(), "k-means", k));
     }
 
     /**
@@ -451,44 +429,22 @@ public class LocationsFragment extends Fragment {
      * @param locations the list of locations to be clustered.
      */
     private void runMeanShift(final GPSLocation[] locations){
-        client.registerMessageReceiver(new MessageReceiver() {
+        client.registerMessageReceiver(new MessageReceiver(Constants.MHLClientFilter.CLUSTER) {
             @Override
             protected void onMessageReceived(JSONObject json) {
-                final Map<Integer, Cluster<GPSLocation>> clusters = new ArrayMap<>();
+                Map<Integer, Cluster<GPSLocation>> clusters = new ArrayMap<>();
                 try {
-                    // These few lines of code parse the String object containing
-                    // the indexes.
-                    String str = json.getString("indexes");
-                    String[] indexList = str.substring(1, str.length()-1).split(",");
-                    int[] indexes = new int[indexList.length];
-                    for (int i = 0; i < indexList.length; i++){
-                        indexes[i] = Integer.parseInt(indexList[i].replace("\"", "").trim());
+                    JSONArray indexes = json.getJSONArray("indexes");
+                    //TODO: Using the cluster index of each location, generate a list of clusters, then call drawClusters()
+                    for (int i = 0; i < indexes.length(); i++) {
+                        int index = indexes.getInt(i);
                     }
-
-
-                    for (int i = 0; i < indexes.length; i++) {
-                        int index = indexes[i];
-                        //TODO: Using the index of each location, generate clusters, then call drawClusters().
-                        //You may choose to use the Map defined above or find a different way of doing it.
-                    }
-
-                    // We are only allowed to manipulate the map on the main (UI) thread:
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            drawClusters(clusters.values());
-                        }
-                    });
-
                 } catch (JSONException e) {
                     e.printStackTrace();
-                } finally {
-                    client.unregisterMessageReceiver(this);
                 }
             }
         });
-        client.connect();
-        client.sendSensorReading(new ClusteringRequest(userID, "", "", System.currentTimeMillis(), locations, "mean_shift", -1));
+        client.sendSensorReading(new ClusteringRequest(userID, "", "", System.currentTimeMillis(), "mean-shift"));
     }
 
     /**
