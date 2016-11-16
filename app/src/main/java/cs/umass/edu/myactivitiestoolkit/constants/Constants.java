@@ -30,6 +30,7 @@ public class Constants {
         String BROADCAST_LABEL_CHANGE = "label_change";
         String LABEL = "label";
         String ACTIVITY_NAME = "activity_name";
+        String BROADCAST_SERVER_SPEAKER_PREDICTION = "edu.umass.cs.my-activities-toolkit.action.broadcast-server-speaker-prediction";
     }
 
 
@@ -60,6 +61,7 @@ public class Constants {
         String ACCELEROMETER_PEAK_TIMESTAMP = "edu.umass.cs.my-activities-toolkit.key.accelerometer-peak-timestamp";
         String ACCELEROMETER_PEAK_VALUE = "edu.umass.cs.my-activities-toolkit.key.accelerometer-peak-value";
         String NOTIFICATION_ID = "edu.umass.cs.my-activities-toolkit.key.sensor-service-type";
+        String SERVER_SPEAKER_PREDICTION = "edu.umass.cs.my-activities-toolkit.key.server-speaker-prediction";
     }
 
     /**

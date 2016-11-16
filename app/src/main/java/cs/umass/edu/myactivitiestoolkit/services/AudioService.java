@@ -84,6 +84,7 @@ public class AudioService extends SensorService implements MicrophoneRecorder.Mi
                 try {
                     JSONObject data = json.getJSONObject("data");
                     speaker = data.getString("speaker");
+                    broadcastSpeakerPrediction(speaker);
                 } catch (JSONException e) {
                     e.printStackTrace();
                     return;
@@ -92,6 +93,14 @@ public class AudioService extends SensorService implements MicrophoneRecorder.Mi
             }
         });
         super.onConnected();
+    }
+
+    private void broadcastSpeakerPrediction(String speaker) {
+        Intent intent = new Intent();
+        intent.putExtra(Constants.KEY.SERVER_SPEAKER_PREDICTION, speaker);
+        intent.setAction(Constants.ACTION.BROADCAST_SERVER_SPEAKER_PREDICTION);
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        manager.sendBroadcast(intent);
     }
 
     @Override
@@ -145,6 +154,7 @@ public class AudioService extends SensorService implements MicrophoneRecorder.Mi
         long timestamp = System.currentTimeMillis();
 
         //TODO: Send the audio buffer to the server
+        // DONE: A3
         AudioBufferReading bufferReading = new AudioBufferReading(mUserID, "MOBILE", "", timestamp, buffer);
         mClient.sendSensorReading(bufferReading);
 
