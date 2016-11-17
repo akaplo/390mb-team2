@@ -95,7 +95,11 @@ public class DBScan<T extends Clusterable<T>> {
         }
 
         //TODO: Implement the DBScan algorithm - currently the code returns a single cluster containing all points
-
+        for (T p : points){
+            //determine if core point or not
+            //label it
+            //expand if core
+        }
         //TODO: The following block of code adds all points to a single cluster. Make sure to remove this!
         {
             Cluster<T> fakeCluster = new Cluster<T>();
@@ -140,6 +144,8 @@ public class DBScan<T extends Clusterable<T>> {
     private List<T> regionQuery(final T p, final Collection<T> points) {
         //TODO: Query the region around point p to get its neighbors, that is all points within eps of p
         final List<T> neighbors = new ArrayList<T>();
+        //p.distance()
+        //look at every other point
         return neighbors;
     }
 

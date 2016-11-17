@@ -219,6 +219,7 @@ public class LocationsFragment extends Fragment {
             @Override
             public void onMapReady(GoogleMap mMap) {
                 LocationsFragment.this.map = mMap;
+                map.addMarker(new MarkerOptions().position(new LatLng(42.39, -69.53)));
             }
         });
 

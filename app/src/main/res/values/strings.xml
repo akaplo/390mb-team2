@@ -56,6 +56,5 @@
         <item>Jump</item>
         <item>Run</item>
     </string-array>
-    <string name="title_activity_maps">Map</string>
 
 </resources>
