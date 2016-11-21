@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.util.ArrayMap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -381,6 +382,10 @@ public class LocationsFragment extends Fragment {
      */
     private void runDBScan(GPSLocation[] locations, float eps, int minPts){
         //TODO: Cluster the locations by calling DBScan.
+        DBScan scan = new DBScan(eps, minPts);
+        //drawClusters(scan);
+        drawHullFromPoints(locations,1);
+
     }
 
     /**
@@ -419,6 +424,7 @@ public class LocationsFragment extends Fragment {
                         int index = indexes[i];
                         //TODO: Using the index of each location, generate a list of k clusters, then call drawClusters().
                         //You may choose to use the Map defined above or find a different way of doing it.
+                        Log.d("clusters",clusters.toString());
                     }
 
                     // We are only allowed to manipulate the map on the main (UI) thread:
