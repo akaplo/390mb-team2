@@ -126,14 +126,16 @@ public class DBScan<T extends Clusterable<T>> {
         //TODO: Complete the rest of the expandCluster algorithm, as outlined in the slides
 
         cluster.addPoint(p);
-        states.put(p, State.CLUSTERED);
         for (T q : neighborPts){
-            if(regionQuery(q, points).size()>=minPts){
-                expandCluster(cluster, q, states, regionQuery(q, points), points);
+            if(states.get(q)==State.UNVISITED) {
+                if (regionQuery(q, points).size() >= minPts) {
+                    addAsSet(neighborPts, regionQuery(q, points));
+                    states.put(q, State.CLUSTERED);
+                } else {
+                    states.put(q, State.NOISE);
+                }
             }
-            else{
-                states.put(q, State.NOISE);
-            }
+            cluster.addPoint(q);
         }
 
     }
@@ -149,7 +151,7 @@ public class DBScan<T extends Clusterable<T>> {
     private List<T> regionQuery(final T p, final Collection<T> points) {
         //TODO: Query the region around point p to get its neighbors, that is all points within eps of p
         final List<T> neighbors = new ArrayList<T>();
-        //look at every other point
+        //look at every point
         for(final T q : points){
             if(p.distance(q)<=eps){
                 neighbors.add(q);
