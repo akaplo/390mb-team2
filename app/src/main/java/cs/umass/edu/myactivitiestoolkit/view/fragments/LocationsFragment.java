@@ -478,6 +478,7 @@ public class LocationsFragment extends Fragment {
                         int index = indexes[i];
                         //TODO: Using the index of each location, generate clusters, then call drawClusters().
                         //You may choose to use the Map defined above or find a different way of doing it.
+                        Log.d("clusters",clusters.toString());
                     }
 
                     // We are only allowed to manipulate the map on the main (UI) thread:
