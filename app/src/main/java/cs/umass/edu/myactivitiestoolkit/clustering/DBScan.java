@@ -98,7 +98,9 @@ public class DBScan<T extends Clusterable<T>> {
         for (T p : points){
             if(states.get(p)==State.UNVISITED){
                 if(regionQuery(p,points).size()>=minPts){
-                    expandCluster(new Cluster<T>(), p, states, regionQuery(p, points), points);
+                    Cluster<T> newcluster = new Cluster<T>();
+                    expandCluster(newcluster, p, states, regionQuery(p, points), points);
+                    clusters.add(newcluster);
                 }
                 else{
                     states.put(p, State.NOISE);
