@@ -43,7 +43,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -371,6 +373,17 @@ public class LocationsFragment extends Fragment {
     private void drawClusters(final Collection<Cluster<GPSLocation>> clusters){
         final int[] colors = new int[]{Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.CYAN, Color.WHITE};
         // TODO: For each cluster, draw a convex hull around the points in a sufficiently distinct color
+        // DONE!
+        int currenColorIndex = 0;
+        for (Cluster<GPSLocation> cluster : clusters) {
+            if (currenColorIndex >= colors.length) {
+                currenColorIndex = 0;
+            }
+            GPSLocation[] locations = new GPSLocation[cluster.getPoints().size()];
+            locations = cluster.getPoints().toArray(locations);
+            drawHullFromPoints(locations, colors[currenColorIndex]);
+            currenColorIndex++;
+        }
     }
 
     /**
@@ -382,10 +395,11 @@ public class LocationsFragment extends Fragment {
      */
     private void runDBScan(GPSLocation[] locations, float eps, int minPts){
         //TODO: Cluster the locations by calling DBScan.
-        DBScan scan = new DBScan(eps, minPts);
-        //drawClusters(scan);
-        drawHullFromPoints(locations,1);
-
+        // DONE!
+        DBScan<GPSLocation> scan = new DBScan<GPSLocation>(eps, minPts);
+        ArrayList<GPSLocation> arrLocs = new ArrayList<GPSLocation>(Arrays.asList(locations));
+        Collection<Cluster<GPSLocation>> clusts = scan.cluster(arrLocs);
+        drawClusters(clusts);
     }
 
     /**
