@@ -139,7 +139,6 @@ public class DBScan<T extends Clusterable<T>> {
             }
             cluster.addPoint(q);
         }
-
     }
 
     /**
