@@ -93,20 +93,55 @@ public class DBScan<T extends Clusterable<T>> {
         for (final T p : points){
             states.put(p, State.UNVISITED);
         }
-
-        //TODO: Implement the DBScan algorithm - currently the code returns a single cluster containing all points
-        for (T p : points){
-            if(states.get(p)==State.UNVISITED){
-                if(regionQuery(p,points).size()>=minPts){
-                    Cluster<T> newcluster = new Cluster<T>();
-                    expandCluster(newcluster, p, states, regionQuery(p, points), points);
-                    clusters.add(newcluster);
+//PSEUDOCODE
+//        -------------------------------------
+//
+//        DBSCAN(D, eps, MinPts)
+//          C = 0
+//              for each unvisited point P in dataset D
+//                mark P as visited
+//                N = getNeighbors (P, eps)
+//                if sizeof(N) < MinPts
+//                  mark P as NOISE
+//                else
+//                  C = next cluster
+//                  expandCluster(P, N, C, eps, MinPts)
+////
+//                ---------------------------------------
+//        //TODO: Implement the DBScan algorithm - currently the code returns a single cluster containing all points
+        for (T point : points){
+            if (states.get(point) == State.UNVISITED) {
+                states.put(point, State.CLUSTERED);
+                List<T> neigbors = regionQuery(point, points);
+                if (neigbors.size() < minPts) {
+                    states.put(point, State.NOISE);
                 }
-                else{
-                    states.put(p, State.NOISE);
+                else {
+                    Cluster<T> cluster = new Cluster<>();
+                    expandCluster(cluster, point, states, neigbors, points);
+                    clusters.add(cluster);
                 }
             }
         }
+//            if(states.get(p)==State.UNVISITED){
+//                if(regionQuery(p,points).size()>=minPts){
+//                    Cluster<T> newcluster = new Cluster<T>();
+//                    expandCluster(newcluster, p, states, regionQuery(p, points), points);
+//                    clusters.add(newcluster);
+//                }
+//                else{
+//                    states.put(p, State.NOISE);
+//                }
+//            }
+//        }
+        //TODO: The following block of code adds all points to a single cluster. Make sure to remove this!
+//        {
+//            Cluster<T> fakeCluster = new Cluster<T>();
+//            for (final T p : points)
+//                fakeCluster.addPoint(p);
+//            clusters.add(fakeCluster);
+//        }
+
         return clusters;
     }
 
@@ -121,24 +156,51 @@ public class DBScan<T extends Clusterable<T>> {
      * @param neighborPts the list of neighboring points
      * @param points the set of all points
      */
+//        expandCluster(P, N, C, eps, MinPts)
+//          add P to cluster C
+//          for each point P' in N
+//              if P' is not visited
+//                  mark P' as visited
+//                  N' = getNeighbors(P', eps)
+//                  if sizeof(N') >= MinPts
+//                      N = N joined with N'
+//              if P' is not yet member of any cluster
+//                  add P' to cluster C
     private void expandCluster(Cluster<T> cluster, final T p, final Map<T, State> states,
                                      final List<T> neighborPts, final Collection<T> points) {
 
         //we added the point p to the cluster and also flagged it as clustered for you, to demonstrate how to do that
-        //TODO: Complete the rest of the expandCluster algorithm, as outlined in the slides
-
         cluster.addPoint(p);
-        for (T q : neighborPts){
-            if(states.get(q)==State.UNVISITED) {
-                if (regionQuery(q, points).size() >= minPts) {
-                    addAsSet(neighborPts, regionQuery(q, points));
-                    states.put(q, State.CLUSTERED);
-                } else {
-                    states.put(q, State.NOISE);
+        states.put(p, State.CLUSTERED);
+
+        //TODO: Complete the rest of the expandCluster algorithm, as outlined in the slides
+        for (int x = 0; x < neighborPts.size(); x++) {
+            T point = neighborPts.get(x);
+            if (states.get(point) != State.CLUSTERED) {
+                states.put(point, State.CLUSTERED);
+                List<T> neigborsOfCurrentNeighboringPoint = regionQuery(point, points);
+                if (neigborsOfCurrentNeighboringPoint.size() >= minPts) {
+                    addAsSet(neighborPts, neigborsOfCurrentNeighboringPoint);
                 }
+                cluster.addPoint(point);
             }
-            cluster.addPoint(q);
         }
+
+//        //we added the point p to the cluster and also flagged it as clustered for you, to demonstrate how to do that
+//        //TODO: Complete the rest of the expandCluster algorithm, as outlined in the slides
+//
+//        cluster.addPoint(p);
+//        for (T q : neighborPts){
+//            if(states.get(q)==State.UNVISITED) {
+//                if (regionQuery(q, points).size() >= minPts) {
+//                    addAsSet(neighborPts, regionQuery(q, points));
+//                    states.put(q, State.CLUSTERED);
+//                } else {
+//                    states.put(q, State.NOISE);
+//                }
+//            }
+//            cluster.addPoint(q);
+//        }
 
     }
 
