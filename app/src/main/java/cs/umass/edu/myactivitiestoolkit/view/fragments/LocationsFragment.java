@@ -428,17 +428,36 @@ public class LocationsFragment extends Fragment {
                     // the indexes.
                     String str = json.getString("indexes");
                     String[] indexList = str.substring(1, str.length()-1).split(",");
-                    int[] indexes = new int[indexList.length];
+                    Integer[] indexes = new Integer[indexList.length];
                     for (int i = 0; i < indexList.length; i++){
-                        indexes[i] = Integer.parseInt(indexList[i].replace("\"", "").trim());
+                        indexes[i] = Integer.valueOf(indexList[i].replace("\"", "").trim());
                     }
-
-
+                    ArrayList<Integer> list = new ArrayList<>();
+                    // Go through each "index" and add it to a list.
+                    // When finished, the length of the list will contain
+                    // the number of clusters we need to create.
+                    for (Integer i : indexes) {
+                        if (!list.contains(i)) {
+                            list.add(i);
+                        }
+                    }
                     for (int i = 0; i < indexes.length; i++) {
                         int index = indexes[i];
                         //TODO: Using the index of each location, generate a list of k clusters, then call drawClusters().
                         //You may choose to use the Map defined above or find a different way of doing it.
-                        Log.d("clusters",clusters.toString());
+
+                        // If there's no cluster in the master list at the given cluster index, create one.
+                        // Then, add the current point to it.
+                        // Finally, add it to the master list.
+                        if (clusters.get(index) == null) {
+                            Cluster<GPSLocation> newCluster = new Cluster<GPSLocation>();
+                            newCluster.addPoint(locations[index]);
+                            clusters.put(index, newCluster);
+                        }
+                        // There is a cluster already. Add the current point to it.
+                        else {
+                            clusters.get(index).addPoint(locations[index]);
+                        }
                     }
 
                     // We are only allowed to manipulate the map on the main (UI) thread:
