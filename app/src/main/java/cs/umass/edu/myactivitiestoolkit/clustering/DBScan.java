@@ -185,8 +185,6 @@ public class DBScan<T extends Clusterable<T>> {
                 cluster.addPoint(point);
             }
         }
-<<<<<<< HEAD
-=======
 
 //        //we added the point p to the cluster and also flagged it as clustered for you, to demonstrate how to do that
 //        //TODO: Complete the rest of the expandCluster algorithm, as outlined in the slides
@@ -204,7 +202,6 @@ public class DBScan<T extends Clusterable<T>> {
 //            cluster.addPoint(q);
 //        }
 
->>>>>>> f21a11f9816173acc236dbc30629b8c15a11c782
     }
 
     /**

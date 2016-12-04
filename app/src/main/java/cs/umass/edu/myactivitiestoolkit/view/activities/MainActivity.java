@@ -26,6 +26,7 @@ import cs.umass.edu.myactivitiestoolkit.view.fragments.AboutFragment;
 import cs.umass.edu.myactivitiestoolkit.view.fragments.AudioFragment;
 import cs.umass.edu.myactivitiestoolkit.view.fragments.ExerciseFragment;
 import cs.umass.edu.myactivitiestoolkit.view.fragments.HeartRateFragment;
+import cs.umass.edu.myactivitiestoolkit.view.fragments.In_or_OutFragment;
 import cs.umass.edu.myactivitiestoolkit.view.fragments.LocationsFragment;
 import cs.umass.edu.myactivitiestoolkit.view.fragments.SettingsFragment;
 
@@ -125,6 +126,17 @@ public class MainActivity extends AppCompatActivity {
             public int getPageNumber() {
                 return 5;
             }
+        },
+        In_OR_OUT(In_or_OutFragment.class) {
+            @Override
+            public String getTitle() {
+                return "In or Out";
+            }
+
+            @Override
+            public int getPageNumber() {
+                return 6;
+            }
         };
 
         /**
@@ -211,27 +223,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    public void sitClicked(View v){
-        Intent intent = new Intent(AccelerometerService.class.getName());
-        intent.putExtra("activity",0);
-        this.getApplicationContext().startService(intent);
-        this.getBaseContext().startService(intent);
-        this.startService(intent);
-
-        Log.d("sitclicked","main");
-
-
-    }
-    public void walkClicked(View v){
-
-    }
-    public void jumpClicked(View v){
-
-    }
-    public void runClicked(View v){
-
-    }
 
 
     @Override
