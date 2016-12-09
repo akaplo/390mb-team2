@@ -432,23 +432,24 @@ public class LocationsFragment extends Fragment {
                     for (int i = 0; i < indexList.length; i++){
                         indexes[i] = Integer.valueOf(indexList[i].replace("\"", "").trim());
                     }
-
+                        // [A, B, C, D]
+                        // [1, 1, 3, 4]
                     for (int i = 0; i < indexes.length; i++) {
-                        int index = indexes[i];
+                        int clusterID = indexes[i];
                         //TODO: Using the index of each location, generate a list of k clusters, then call drawClusters().
                         //You may choose to use the Map defined above or find a different way of doing it.
 
                         // If there's no cluster in the master list at the given cluster index, create one.
                         // Then, add the current point to it.
                         // Finally, add it to the master list.
-                        if (clusters.get(index) == null) {
+                        if (clusters.get(clusterID) == null) {
                             Cluster<GPSLocation> newCluster = new Cluster<GPSLocation>();
-                            newCluster.addPoint(locations[index]);
-                            clusters.put(index, newCluster);
+                            newCluster.addPoint(locations[i]);
+                            clusters.put(clusterID, newCluster);
                         }
                         // There is a cluster already. Add the current point to it.
                         else {
-                            clusters.get(index).addPoint(locations[index]);
+                            clusters.get(clusterID).addPoint(locations[i]);
                         }
                     }
 
@@ -500,7 +501,7 @@ public class LocationsFragment extends Fragment {
 
 
                     for (int i = 0; i < indexes.length; i++) {
-                        int index = indexes[i];
+                        int clusterID = indexes[i];
                         //TODO: Using the index of each location, generate clusters, then call drawClusters().
                         //You may choose to use the Map defined above or find a different way of doing it.
 
@@ -508,14 +509,14 @@ public class LocationsFragment extends Fragment {
                         // If there's no cluster in the master list at the given cluster index, create one.
                         // Then, add the current point to it.
                         // Finally, add it to the master list.
-                        if (clusters.get(index) == null) {
+                        if (clusters.get(clusterID) == null) {
                             Cluster<GPSLocation> newCluster = new Cluster<GPSLocation>();
-                            newCluster.addPoint(locations[index]);
-                            clusters.put(index, newCluster);
+                            newCluster.addPoint(locations[i]);
+                            clusters.put(clusterID, newCluster);
                         }
                         // There is a cluster already. Add the current point to it.
                         else {
-                            clusters.get(index).addPoint(locations[index]);
+                            clusters.get(clusterID).addPoint(locations[i]);
                         }
                     }
 
