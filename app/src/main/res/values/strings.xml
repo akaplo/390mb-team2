@@ -57,4 +57,10 @@
         <item>Run</item>
     </string-array>
 
+    <string-array name="in_or_out">
+        <item>No Label</item>
+        <item>Inside</item>
+        <item>Outside</item>
+    </string-array>
+
 </resources>

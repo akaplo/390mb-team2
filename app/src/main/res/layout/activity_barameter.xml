@@ -4,6 +4,11 @@
     android:layout_height="match_parent"
     tools:context=".Barometer" >
 
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/barometer_spinner" />
+
     <TextView
         android:id="@+id/TextView"
         android:layout_width="wrap_content"
