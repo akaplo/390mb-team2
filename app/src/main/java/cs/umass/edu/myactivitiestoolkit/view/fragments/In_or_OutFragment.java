@@ -34,9 +34,7 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
     int mCurrentLabel = NO_LABEL;
     String TAG = getTag();
 
-        //SensorManager lets you access the device's sensors
-        //declare Variables
-        TextView textView, TVAirPressure;
+    TextView TVAirPressure, MagneticField, Light;
         private SensorManager sensorManager;
     private ServiceManager serviceManager;
     protected MobileIOClient mClient;
@@ -53,12 +51,13 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.activity_barameter, container, false);
-        textView = (TextView) view.findViewById(R.id.TextView);
         TVAirPressure = (TextView) view.findViewById(R.id.TVAirPressure);
+        MagneticField = (TextView) view.findViewById(R.id.Magnetic);
+        Light = (TextView) view.findViewById(R.id.light);
         //create instance of sensor manager and get system service to interact with Sensor
 
 // "Spinner" is the dropdown box on the UI - a terrible class name
-        Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
+        Spinner spinner = (Spinner) view.findViewById(R.id.barometer_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.in_or_out, android.R.layout.simple_spinner_item);
@@ -68,7 +67,6 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
         spinner.setAdapter(adapter);
         // Specify that this class (see onItemSelected below) is the desired listener
         spinner.setOnItemSelectedListener(this);
-
         return view;
     }
 
@@ -77,9 +75,9 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
        public void onResume() {
             super.onResume();
             // register this class as a listener for the Pressure Sensor
-            sensorManager.registerListener(this,
-                    sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE), SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT), SensorManager.SENSOR_DELAY_NORMAL);
         }
 
         // called when sensor value have changed
@@ -94,11 +92,33 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
                 }
                 // If the data is labeled, send the label along with the data
                 else {
-                    mClient.sendSensorReading(new AccelerometerReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, mCurrentLabel, values));
+                    mClient.sendSensorReading(new BarometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values, mCurrentLabel));
                 }
-
             }
-
+            if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
+                long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
+                float[] values = event.values;
+                MagneticField.setText("" + values[0]);
+                if (mCurrentLabel == ExerciseFragment.NO_LABEL) {
+                    mClient.sendSensorReading(new BarometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values));
+                }
+                // If the data is labeled, send the label along with the data
+                else {
+                    mClient.sendSensorReading(new BarometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values, mCurrentLabel));
+                }
+            }
+            if(event.sensor.getType() == Sensor.TYPE_LIGHT){
+                long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
+                float[] values = event.values;
+                Light.setText(""+ (int)values[0]);
+                if (mCurrentLabel == ExerciseFragment.NO_LABEL) {
+                    mClient.sendSensorReading(new BarometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values));
+                }
+                // If the data is labeled, send the label along with the data
+                else {
+                    mClient.sendSensorReading(new BarometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values, mCurrentLabel));
+                }
+            }
         }
 
         @Override

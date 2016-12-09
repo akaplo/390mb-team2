@@ -1,8 +1,8 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Barometer" >
+    android:orientation="vertical">
 
     <Spinner
         android:layout_width="wrap_content"
@@ -10,21 +10,44 @@
         android:id="@+id/barometer_spinner" />
 
     <TextView
-        android:id="@+id/TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="25dp"
         android:text="Air Pressure"
         android:textColor="#0835C9"
         android:textSize="30sp" />
 
     <TextView
         android:id="@+id/TVAirPressure"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
         android:textColor="#08C9BD"
-        android:textSize="40sp" />
+        android:textSize="25sp" />
 
-</RelativeLayout>
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:text="Magnetic"
+        android:textColor="#0835C9"
+        android:textSize="25sp" />
+    <TextView
+        android:id="@+id/Magnetic"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:textColor="#08C9BD"
+        android:textSize="25sp" />
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:text="Light"
+        android:textColor="#0835C9"
+        android:textSize="25sp" />
+    <TextView
+        android:id="@+id/light"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:textColor="#08C9BD"
+        android:textSize="25sp" />
+
+</LinearLayout>
