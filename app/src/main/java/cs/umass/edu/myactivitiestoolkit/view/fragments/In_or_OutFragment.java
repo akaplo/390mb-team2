@@ -90,38 +90,20 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
                 float[] values = event.values;
                 TVAirPressure.setText("" + values[0]);
                 mClient.connect();
-                if (mCurrentLabel == ExerciseFragment.NO_LABEL) {
-                    mClient.sendSensorReading(new BarometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values[0]));
-                }
-                // If the data is labeled, send the label along with the data
-                else {
-                    mClient.sendSensorReading(new BarometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values[0], mCurrentLabel));
-                }
+                mClient.sendSensorReading(new BarometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values[0], mCurrentLabel));
             }
             if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
                 long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
                 float[] values = event.values;
                 MagneticField.setText("x: " + values[0] + "y: " + values[1] + "z: " + values[2]);
-                if (mCurrentLabel == ExerciseFragment.NO_LABEL) {
-                    mClient.sendSensorReading(new MagnetometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values));
-                }
-                // If the data is labeled, send the label along with the data
-                else {
-                    mClient.sendSensorReading(new MagnetometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values, mCurrentLabel));
-                }
+                mClient.sendSensorReading(new MagnetometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values, mCurrentLabel));
             }
             if(event.sensor.getType() == Sensor.TYPE_LIGHT){
                 long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
                 float[] values = event.values;
                 int value = (int)values[0];
                 Light.setText(""+value);
-                if (mCurrentLabel == ExerciseFragment.NO_LABEL) {
-                    mClient.sendSensorReading(new AmbientLightSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, value));
-                }
-                // If the data is labeled, send the label along with the data
-                else {
-                    mClient.sendSensorReading(new AmbientLightSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, value, mCurrentLabel));
-                }
+                mClient.sendSensorReading(new AmbientLightSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, value, mCurrentLabel));
             }
         }
 
