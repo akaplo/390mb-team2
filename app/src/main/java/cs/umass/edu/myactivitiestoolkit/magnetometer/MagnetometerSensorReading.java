@@ -10,7 +10,15 @@ import edu.umass.cs.MHLClient.sensors.SensorReading;
  */
 
 public class MagnetometerSensorReading extends SensorReading {
-    private final float value;
+    /** The acceleration along the x-axis **/
+    private final float x;
+
+    /** The acceleration along the y-axis **/
+    private final float y;
+
+    /** The acceleration along the z-axis **/
+    private final float z;
+
 
     /**
      * Instantiates a Barometer sensor reading.
@@ -18,18 +26,22 @@ public class MagnetometerSensorReading extends SensorReading {
      * @param deviceType describes the device
      * @param deviceID unique device identifier
      * @param t the timestamp at which the event occurred, in Unix time by convention.
-     * @param value the barometer reading in hPa
+     * @param values the barometer reading in hPa
      */
-    public MagnetometerSensorReading(String userID, String deviceType, String deviceID, long t, float value){
+    public MagnetometerSensorReading(String userID, String deviceType, String deviceID, long t, float[] values){
         super(userID, deviceType, deviceID, "SENSOR_MAGNETOMETER", t);
 
-        this.value = value;
+        this.x = values[0];
+        this.y = values[1];
+        this.z = values[2];
     }
     // COLLECT LABELED DATA WITH THIS ONE
-    public MagnetometerSensorReading(String userID, String deviceType, String deviceID, long t, float value, int label){
+    public MagnetometerSensorReading(String userID, String deviceType, String deviceID, long t, float[] values, int label){
         super(userID, deviceType, deviceID, "SENSOR_MAGNETOMETER", t, label);
 
-        this.value = value;
+        this.x = values[0];
+        this.y = values[1];
+        this.z = values[2];
     }
 
     @Override
@@ -39,7 +51,9 @@ public class MagnetometerSensorReading extends SensorReading {
 
         try {
             data.put("t", timestamp);
-            data.put("value", value);
+            data.put("x", x);
+            data.put("y", y);
+            data.put("z", z);
 
             obj.put("data", data);
         } catch (JSONException e) {

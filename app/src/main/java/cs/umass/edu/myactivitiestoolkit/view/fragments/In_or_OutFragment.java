@@ -101,13 +101,13 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
             if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
                 long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
                 float[] values = event.values;
-                MagneticField.setText("" + values[0]);
+                MagneticField.setText("x: " + values[0] + "y: " + values[1] + "z: " + values[2]);
                 if (mCurrentLabel == ExerciseFragment.NO_LABEL) {
-                    mClient.sendSensorReading(new MagnetometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values[0]));
+                    mClient.sendSensorReading(new MagnetometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values));
                 }
                 // If the data is labeled, send the label along with the data
                 else {
-                    mClient.sendSensorReading(new MagnetometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values[0], mCurrentLabel));
+                    mClient.sendSensorReading(new MagnetometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values, mCurrentLabel));
                 }
             }
             if(event.sensor.getType() == Sensor.TYPE_LIGHT){
