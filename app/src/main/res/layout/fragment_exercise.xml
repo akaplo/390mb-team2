@@ -5,7 +5,7 @@
     The exercise fragment will be used in the following assignments:
 
         Data Collection :       You will be required to update txtAccelerometerReading with
-                                the current accelerometer values.
+                                the current accelerometer value.
 
         Step Detection :        You will be required to update txtAndroidStepCount with the
                                 step count computed by the Android built-in step detection

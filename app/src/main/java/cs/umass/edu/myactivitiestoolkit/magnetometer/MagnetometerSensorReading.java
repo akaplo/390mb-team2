@@ -1,4 +1,4 @@
-package cs.umass.edu.myactivitiestoolkit.barometer;
+package cs.umass.edu.myactivitiestoolkit.magnetometer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -6,11 +6,10 @@ import org.json.JSONObject;
 import edu.umass.cs.MHLClient.sensors.SensorReading;
 
 /**
- * Created by Aaron Kaplowitz on 12/9/16.
+ * Created by aaron on 12/10/16.
  */
 
-public class BarometerSensorReading extends SensorReading {
-    /** The heart rate value. **/
+public class MagnetometerSensorReading extends SensorReading {
     private final float value;
 
     /**
@@ -21,14 +20,14 @@ public class BarometerSensorReading extends SensorReading {
      * @param t the timestamp at which the event occurred, in Unix time by convention.
      * @param value the barometer reading in hPa
      */
-    public BarometerSensorReading(String userID, String deviceType, String deviceID, long t, float value){
-        super(userID, deviceType, deviceID, "SENSOR_BAROMETER", t);
+    public MagnetometerSensorReading(String userID, String deviceType, String deviceID, long t, float value){
+        super(userID, deviceType, deviceID, "SENSOR_MAGNETOMETER", t);
 
         this.value = value;
     }
     // COLLECT LABELED DATA WITH THIS ONE
-    public BarometerSensorReading(String userID, String deviceType, String deviceID, long t, float value, int label){
-        super(userID, deviceType, deviceID, "SENSOR_BAROMETER", t, label);
+    public MagnetometerSensorReading(String userID, String deviceType, String deviceID, long t, float value, int label){
+        super(userID, deviceType, deviceID, "SENSOR_MAGNETOMETER", t, label);
 
         this.value = value;
     }
