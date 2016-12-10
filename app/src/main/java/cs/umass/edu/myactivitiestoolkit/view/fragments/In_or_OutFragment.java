@@ -87,6 +87,7 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
                 long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
                 float[] values = event.values;
                 TVAirPressure.setText("" + values[0]);
+                mClient.connect();
                 if (mCurrentLabel == ExerciseFragment.NO_LABEL) {
                     mClient.sendSensorReading(new BarometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values));
                 }
