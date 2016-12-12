@@ -132,21 +132,22 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
                 mClient.sendSensorReading(new MagnetometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values, mCurrentLabel));
             }
             if(event.sensor.getType() == Sensor.TYPE_LIGHT){
-                if (keepSendingLightValues != null) {
-                    keepSendingLightValues.cancel(false);
-                    keepSendingLightValues = null;
-                }
+//                if (keepSendingLightValues != null) {
+//                    keepSendingLightValues.cancel(false);
+//                    keepSendingLightValues = null;
+//                }
                 final long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
                 float[] values = event.values;
                 final int value = (int)values[0];
                 Light.setText(""+value);
-                final Runnable sendReading = new Runnable() {
-                    @Override
-                    public void run() {
-                        mClient.sendSensorReading(new AmbientLightSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, value, mCurrentLabel));
-                    }
-                };
-                keepSendingLightValues = scheduler.scheduleAtFixedRate(sendReading, 0, 500, TimeUnit.MILLISECONDS);
+                mClient.sendSensorReading(new AmbientLightSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, value, mCurrentLabel));
+//                final Runnable sendReading = new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mClient.sendSensorReading(new AmbientLightSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, value, mCurrentLabel));
+//                    }
+//                };
+//                keepSendingLightValues = scheduler.scheduleAtFixedRate(sendReading, 0, 500, TimeUnit.MILLISECONDS);
             }
         }
 
