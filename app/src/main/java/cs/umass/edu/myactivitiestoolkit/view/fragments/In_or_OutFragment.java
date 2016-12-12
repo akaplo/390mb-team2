@@ -20,6 +20,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.barometer.BarometerSensorReading;
@@ -44,6 +48,8 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
         private SensorManager sensorManager;
     private ServiceManager serviceManager;
     protected MobileIOClient mClient;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    ScheduledFuture<?> keepSendingLightValues = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -126,11 +132,21 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
                 mClient.sendSensorReading(new MagnetometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values, mCurrentLabel));
             }
             if(event.sensor.getType() == Sensor.TYPE_LIGHT){
-                long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
+                if (keepSendingLightValues != null) {
+                    keepSendingLightValues.cancel(false);
+                    keepSendingLightValues = null;
+                }
+                final long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
                 float[] values = event.values;
-                int value = (int)values[0];
+                final int value = (int)values[0];
                 Light.setText(""+value);
-                mClient.sendSensorReading(new AmbientLightSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, value, mCurrentLabel));
+                final Runnable sendReading = new Runnable() {
+                    @Override
+                    public void run() {
+                        mClient.sendSensorReading(new AmbientLightSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, value, mCurrentLabel));
+                    }
+                };
+                keepSendingLightValues = scheduler.scheduleAtFixedRate(sendReading, 0, 500, TimeUnit.MILLISECONDS);
             }
         }
 
