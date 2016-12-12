@@ -2,7 +2,6 @@ package cs.umass.edu.myactivitiestoolkit.view.fragments;
 
 import android.app.Fragment;
 import android.app.Service;
-import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -17,14 +16,17 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.barometer.BarometerSensorReading;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
 import cs.umass.edu.myactivitiestoolkit.lightsensor.AmbientLightSensorReading;
 import cs.umass.edu.myactivitiestoolkit.magnetometer.MagnetometerSensorReading;
 import cs.umass.edu.myactivitiestoolkit.services.ServiceManager;
+import edu.umass.cs.MHLClient.client.MessageReceiver;
 import edu.umass.cs.MHLClient.client.MobileIOClient;
-import edu.umass.cs.MHLClient.sensors.AccelerometerReading;
 
 
 public class In_or_OutFragment extends Fragment implements SensorEventListener, AdapterView.OnItemSelectedListener {
@@ -47,12 +49,13 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
         serviceManager = ServiceManager.getInstance(getActivity());
         sensorManager = (SensorManager) getActivity().getSystemService(Service.SENSOR_SERVICE);
         mClient = MobileIOClient.getInstance(getString(R.string.mobile_health_client_user_id));
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.activity_barameter, container, false);
+        final View view = inflater.inflate(R.layout.fragment_in_or_out, container, false);
         TVAirPressure = (TextView) view.findViewById(R.id.TVAirPressure);
         MagneticField = (TextView) view.findViewById(R.id.Magnetic);
         Light = (TextView) view.findViewById(R.id.light);
@@ -69,6 +72,25 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
         spinner.setAdapter(adapter);
         // Specify that this class (see onItemSelected below) is the desired listener
         spinner.setOnItemSelectedListener(this);
+        final TextView predictionTextView = (TextView) view.findViewById(R.id.in_or_out_prediction);
+        mClient.registerMessageReceiver(new MessageReceiver(Constants.MHLClientFilter.IN_OR_OUT_DETECTED) {
+            @Override
+            protected void onMessageReceived(JSONObject json) {
+                String environmentPrediction;
+                try {
+                    JSONObject data = json.getJSONObject("data");
+                    environmentPrediction = data.getString("environment");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                // TODO A2 Pt 4: broadcast environmentPrediction to UI
+                if (environmentPrediction != null) {
+                    Log.d(TAG, "Received predicted environment (inside or outside) from server: " + environmentPrediction);
+                    predictionTextView.setText(environmentPrediction == "1" ? "Outside" : "Inside");
+                }
+            }
+        });
         return view;
     }
 

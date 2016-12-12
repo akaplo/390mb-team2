@@ -113,5 +113,6 @@ public class Constants {
         String ACTIVITY_DETECTED = "ACTIVITY_DETECTED";
         String SPEAKER_DETECTED = "SPEAKER_DETECTED";
         String CLUSTER = "CLUSTER";
+        String IN_OR_OUT_DETECTED = "IN_OR_OUT_DETECTED";
     }
 }
