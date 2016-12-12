@@ -19,6 +19,8 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Locale;
+
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.barometer.BarometerSensorReading;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
@@ -49,7 +51,7 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
         serviceManager = ServiceManager.getInstance(getActivity());
         sensorManager = (SensorManager) getActivity().getSystemService(Service.SENSOR_SERVICE);
         mClient = MobileIOClient.getInstance(getString(R.string.mobile_health_client_user_id));
-
+        mClient.connect();
     }
 
     @Override
@@ -76,19 +78,23 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
         mClient.registerMessageReceiver(new MessageReceiver(Constants.MHLClientFilter.IN_OR_OUT_DETECTED) {
             @Override
             protected void onMessageReceived(JSONObject json) {
-                String environmentPrediction;
+                final Double environmentPrediction;
                 try {
                     JSONObject data = json.getJSONObject("data");
-                    environmentPrediction = data.getString("environment");
+                    environmentPrediction = Double.parseDouble(data.getString("activity"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     return;
                 }
                 // TODO A2 Pt 4: broadcast environmentPrediction to UI
-                if (environmentPrediction != null) {
-                    Log.d(TAG, "Received predicted environment (inside or outside) from server: " + environmentPrediction);
-                    predictionTextView.setText(environmentPrediction == "1" ? "Outside" : "Inside");
-                }
+                Log.d(TAG, "Received predicted environment (inside or outside) from server: " + environmentPrediction);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        predictionTextView.setText(environmentPrediction == 1 ? "Outside" : "Inside");
+                    }
+                });
+
             }
         });
         return view;
@@ -111,7 +117,6 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
                 long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
                 float[] values = event.values;
                 TVAirPressure.setText("" + values[0]);
-                mClient.connect();
                 mClient.sendSensorReading(new BarometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values[0], mCurrentLabel));
             }
             if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
