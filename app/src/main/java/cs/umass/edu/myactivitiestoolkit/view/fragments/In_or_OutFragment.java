@@ -19,25 +19,18 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Locale;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import cs.umass.edu.myactivitiestoolkit.R;
 import cs.umass.edu.myactivitiestoolkit.barometer.BarometerSensorReading;
 import cs.umass.edu.myactivitiestoolkit.constants.Constants;
 import cs.umass.edu.myactivitiestoolkit.lightsensor.AmbientLightSensorReading;
 import cs.umass.edu.myactivitiestoolkit.magnetometer.MagnetometerSensorReading;
-import cs.umass.edu.myactivitiestoolkit.services.ServiceManager;
 import edu.umass.cs.MHLClient.client.MessageReceiver;
 import edu.umass.cs.MHLClient.client.MobileIOClient;
 
 
 public class In_or_OutFragment extends Fragment implements SensorEventListener, AdapterView.OnItemSelectedListener {
 
-    // Label for each activity
+    // Labels for when we prerform training
     public final static int NO_LABEL = -1;
     public final static int INSIDE_LABEL = 0;
     public final static int OUTSIDE_LABEL = 1;
@@ -45,16 +38,12 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
     String TAG = getTag();
 
     TextView TVAirPressure, MagneticField, Light;
-        private SensorManager sensorManager;
-    private ServiceManager serviceManager;
+    private SensorManager sensorManager;
     protected MobileIOClient mClient;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    ScheduledFuture<?> keepSendingLightValues = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        serviceManager = ServiceManager.getInstance(getActivity());
         sensorManager = (SensorManager) getActivity().getSystemService(Service.SENSOR_SERVICE);
         mClient = MobileIOClient.getInstance(getString(R.string.mobile_health_client_user_id));
         mClient.connect();
@@ -69,7 +58,7 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
         Light = (TextView) view.findViewById(R.id.light);
         //create instance of sensor manager and get system service to interact with Sensor
 
-// "Spinner" is the dropdown box on the UI - a terrible class name
+        // "Spinner" is the dropdown box on the UI - a terrible class name
         Spinner spinner = (Spinner) view.findViewById(R.id.barometer_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
@@ -81,6 +70,7 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
         // Specify that this class (see onItemSelected below) is the desired listener
         spinner.setOnItemSelectedListener(this);
         final TextView predictionTextView = (TextView) view.findViewById(R.id.in_or_out_prediction);
+        // This callback fires when we receive a prediction from the server
         mClient.registerMessageReceiver(new MessageReceiver(Constants.MHLClientFilter.IN_OR_OUT_DETECTED) {
             @Override
             protected void onMessageReceived(JSONObject json) {
@@ -92,11 +82,11 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
                     e.printStackTrace();
                     return;
                 }
-                // TODO A2 Pt 4: broadcast environmentPrediction to UI
                 Log.d(TAG, "Received predicted environment (inside or outside) from server: " + environmentPrediction);
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        // Throw the prediction up on the UI
                         predictionTextView.setText(environmentPrediction == 1 ? "Outside" : "Inside");
                     }
                 });
@@ -110,15 +100,17 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
         @Override
        public void onResume() {
             super.onResume();
-            // register this class as a listener for the Pressure Sensor
+            // register this class as a listener for the Pressure sensor, Magnetometer, and Light sensor
             sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE), SensorManager.SENSOR_DELAY_NORMAL);
             sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
             sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT), SensorManager.SENSOR_DELAY_NORMAL);
         }
 
-        // called when sensor value have changed
+        // Called when any sensor values have changed
         @Override
         public void onSensorChanged(SensorEvent event) {
+            // Must check which sensor has a new value for us.
+            // After that, give it to the UI and send it to the server.
             if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
                 long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
                 float[] values = event.values;
@@ -132,22 +124,11 @@ public class In_or_OutFragment extends Fragment implements SensorEventListener, 
                 mClient.sendSensorReading(new MagnetometerSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, values, mCurrentLabel));
             }
             if(event.sensor.getType() == Sensor.TYPE_LIGHT){
-//                if (keepSendingLightValues != null) {
-//                    keepSendingLightValues.cancel(false);
-//                    keepSendingLightValues = null;
-//                }
                 final long timestamp_in_milliseconds = (long) ((double) event.timestamp / Constants.TIMESTAMPS.NANOSECONDS_PER_MILLISECOND);
                 float[] values = event.values;
                 final int value = (int)values[0];
                 Light.setText(""+value);
                 mClient.sendSensorReading(new AmbientLightSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, value, mCurrentLabel));
-//                final Runnable sendReading = new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        mClient.sendSensorReading(new AmbientLightSensorReading(getString(R.string.mobile_health_client_user_id), "MOBILE", "", timestamp_in_milliseconds, value, mCurrentLabel));
-//                    }
-//                };
-//                keepSendingLightValues = scheduler.scheduleAtFixedRate(sendReading, 0, 500, TimeUnit.MILLISECONDS);
             }
         }
 
